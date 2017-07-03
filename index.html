@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Smart Tetris</title>
+  <link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="css/style.css" rel="stylesheet">
+  <script src="library/cerebrum.js"></script>
+  <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="
+    crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <div id="output" class="text"></div>
+  <div id="score" class="text"></div>
+  <div id="instructions" class="text"><br /><b>[Key Commands]</b><br />Load Fully Evolved Archive: [CTRL]<br />Speed Up: [E]<br />Slow Down: [D]<br />Toggle
+    AI: [A]<br />Move Shape: [Arrow Keys]<br />Rotate Shape: [Up Arrow]<br />Drop Shape: [Down Arrow]<br />Save State: [Q]<br
+    />Load State: [W]<br />Get Archive: [G]<br />Load Archive: [R]<br />Pick Shape: [I,O,T,S,Z,J,L]</div>
+  <script src="js/tetris.js"></script>
+  <script>
+    $(window).keydown(function (e) {
+      if (e.ctrlKey) {
+        let archiveJSON = $.ajax({
+          url: "./archive.json",
+          async: false
+        }).responseText;
+        loadArchive(archiveJSON);
+        alert("The archive was loaded successfully");
+      }
+    });
+  </script>
+  <script type="text/javascript"></script>
+</body>
+
+</html>
