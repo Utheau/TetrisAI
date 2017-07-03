@@ -92,7 +92,7 @@ let roundState;
 // list of speeds available for the game
 let gameSpeeds = [600, 400, 200, 100, 50, 5, 1, 0];
 let indexGameSpeed = 1;
-// turn our AI on or off (so that a normal player could get in control ad play)
+// turn our AI on or off (so that a normal player could get in control and play)
 let ai = true;
 let draw = true;
 let takenMoves = 0;
