@@ -267,5 +267,57 @@ function evolve() {
   localStorage.setItem("archive", JSON.stringify(archive));
 };
 
+// main part for the creation of the new genomes generation
+// JSDoc to define documentation
+/**
+ * @param {Genome} mother - First parent's genome
+ * @param {Genome} father - Second parent's genome
+ * @return {Genome} 
+ */
 
+function createChild(mother, father) {
+  // creation of the child with random values from mother and father genomes
+  let child = {
+    id: Math.random(),
+    clearedRows: randomChoice(mother.clearedRows, father.clearedRows),
+    heightWeight: randomChoice(mother.heightWeight, father.heightWeight),
+    sumHeight: randomChoice(mother.sumHeight, father.sumHeight),
+    averageHeight: randomChoice(mother.averageHeight, father.averageHeight),
+    holes: randomChoice(mother.holes, father.holes),
+    roughness: randomChoice(mother.roughness, father.roughness),
+    fitness: -1
+  };
+  // mutate each values with mutation rate
+  if (Math.random() < mutationRate) {
+    child.clearedRows = child.clearedRows + Math.random() * mutationStep * 2 - mutationStep;
+  } 
+  if (Math.random() < mutationRate) {
+    child.heightWeight = child.heightWeight + Math.random() * mutationStep * 2 - mutationStep;
+  }
+  if (Math.random() < mutationRate) {
+    child.sumHeight = child.sumHeight + Math.random() * mutationStep * 2 - mutationStep;
+  }
+  if (Math.random() < mutationRate) {
+    child.averageHeight = child.averageHeight + Math.random() * mutationStep * 2 - mutationStep;
+  }
+  if (Math.random() < mutationRate) {
+    child.holes = child.holes + Math.random() * mutationStep * 2 - mutationStep;
+  }
+  if (Math.random() < mutationRate) {
+    child.roughness = child.roughness + Math.random() * mutationStep * 2 - mutationStep;
+  }
+  return child;
+}
+
+function randomChoice(par1, par2) {
+  if (Math.round(Math.random()) == 0) {
+    return clone(par1);
+  } else {
+    return clone(par2);
+  }
+}
+
+function clone(o) {
+  return JSON.parse(JSON.stringify(o));
+}
 
