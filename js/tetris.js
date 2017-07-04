@@ -113,10 +113,10 @@ let genomes = [];
 let currentGenome = -1;
 // stores info of a generation
 let archive = {
-    populationSize: 0,
-    currentGeneration: 0,
-    genomes: [],
-    elites: []
+  populationSize: 0,
+  currentGeneration: 0,
+  genomes: [],
+  elites: []
 };
 
 // indicators of a mutation speed
@@ -156,7 +156,7 @@ window.onkeydown = function (e) {
     }
     speed = gameSpeeds[indexGameSpeed];
     changeSpeed = true;
-  } else if(charPressed.toUpperCase() == "I") {
+  } else if (charPressed.toUpperCase() == "I") {
     indexGameSpeed++;
     if (indexGameSpeed >= gameSpeeds.length) {
       indexGameSpeed = 0;
@@ -164,7 +164,7 @@ window.onkeydown = function (e) {
     speed = gameSpeeds[indexGameSpeed];
     changeSpeed = true;
   } else if (charPressed.toUpperCase() == "X") {
-    ai =!ai;
+    ai = !ai;
   } else if (charPressed.toUpperCase() == "V") {
     loadArchive(prompt("Please insert Archive:"));
   } else if (charPressed.toUpperCase() == "F") {
@@ -213,7 +213,7 @@ function createInitialPopulation() {
 // check the next genome inside of a population, were none is found it moves to the next gen
 function calculateNextGenome() {
   currentGenome++;
-  if(currentGenome == genomes.length) {
+  if (currentGenome == genomes.length) {
     evolve();
   }
   loadState(roundState);
@@ -231,18 +231,18 @@ function evolve() {
   // getting the actual state of the game 
   roundState = getState();
   // organise the genomes in order of fitness
-  genomes.sort(function(y, z) {
+  genomes.sort(function (y, z) {
     return y.fitness - z.fitness;
   });
   // let's add the best fit genome to the elites array
   archive.elites.push(clone(genomes[0]));
   // show the result of the selection and delete the non fit genomes
   console.log("Elite " + genomes[0].fitness + " fitness");
-  while(genomes.length > populationSize / 2) {
+  while (genomes.length > populationSize / 2) {
     genomes.pop();
   }
   let totFitness = 0;
-  for(let i = 0; i < genomes.lenght; i++) {
+  for (let i = 0; i < genomes.lenght; i++) {
     totFitness += genomes[i].fitness;
   }
   // randomize the genomes index
@@ -252,7 +252,7 @@ function evolve() {
   let children = [];
   // adding the fit genomes 
   children.push(clone(genomes[0]));
-  while(children.length < populationSize) {
+  while (children.length < populationSize) {
     // confront the two genomes to get the best features to make a child
     children.push(makeChild(randomGenome(), randomGenome()));
   }
@@ -287,10 +287,10 @@ function createChild(mother, father) {
     roughness: randomChoice(mother.roughness, father.roughness),
     fitness: -1
   };
-  // mutate each values with mutation rate
+  // mutate randomly each values through mutationRate & mutationStep
   if (Math.random() < mutationRate) {
     child.clearedRows = child.clearedRows + Math.random() * mutationStep * 2 - mutationStep;
-  } 
+  }
   if (Math.random() < mutationRate) {
     child.heightWeight = child.heightWeight + Math.random() * mutationStep * 2 - mutationStep;
   }
@@ -321,3 +321,94 @@ function clone(o) {
   return JSON.parse(JSON.stringify(o));
 }
 
+// array of all the possible moves can happen in the current state
+function everyPossibleMove() {
+  let lastState = getState();
+  let possibleMoves = [];
+  let MovesRating = [];
+  let iterations = 0;
+  // rotations
+  for (let rotation = 0; rotation < 4; rotation++) {
+    let previousX = [];
+
+    for (let i = -5; i <= 5; i++) {
+      iterations++;
+      loadState(lastState);
+
+      for (let r = 0; r < rotation; r++) {
+        rotateShape();
+      }
+      // if the iteration is less than 0 than we move the shape to the left
+      // otherwise we move it to the right 
+      if (i < 0) {
+        for (let left = 0; left < Math.abs(i); left++) {
+          moveLeft();
+        }
+      } else if (i > 0) {
+        for (let right = 0; right < i; right++) {
+          moveRight();
+        }
+      }
+      // if it does not move nor to the left/right/rotate than let it go down
+      if (!containing(previousX, currentShape.x)) {
+        // double check this function
+        let moveDownOutcome = moveDown();
+
+        let algorithm = {
+          clearedRows: moveDownOutcome.clearedRows,
+          heightWeight: Math.pow(getHeight(), 1.5),
+          sumHeight: getSumHeight(),
+          averageHeight: getAverageHeight(),
+          holes: getHoles(),
+          roughness: getRoughness()
+        };
+        // rate each move with the result obtained from the algorithm (of course starting from 0)
+        // if lose the game with the new move, than lower its rating
+        let rating = 0;
+        rating += algorithm.clearedRows * genomes[currentGenome].clearedRows;
+        rating += algorithm.heightWeight * genomes[currentGenome].heightWeight;
+        rating += algorithm.sumHeight * genomes[currentGenome].sumHeight;
+        rating += algorithm.averageHeight * genomes[currentGenome].averageHeight;
+        rating += algorithm.holes * genomes[currentGenome].holes;
+        rating += algorithm.roughness * genomes[currentGenome].roughness;
+        if (moveDownOutcome.lose) {
+          rating -= 500;
+        }
+        // push the possible moves in the relative empty array
+        // update the previous position of X value
+        // get the last state
+        // return the moves
+        possibleMoves.push({rotations: rotation, tranlations: i, ratings: rating, algorithm: algorithm });
+        previousX.push(currentShape.x);
+      }
+    }
+  }
+  loadState(lastState);
+  return possibleMoves;
+}
+
+// function that defines the current state of the game
+function getState() {
+  let state = {
+    grid: clone(grid),
+    currentShape: clone(currentShape),
+    upcomingShape: clone(upcomingShape),
+    bag: clone(bag),
+    bagIndex: clone(bagIndex),
+    randomSeed: clone(randomSeed),
+    score: clone(score)
+  };
+  return state;
+}
+
+// function to load the state of the game from a given state object
+function loadState(state) {
+  grid = clone(state.grid);
+  currentShape = clone(state.currentShape);
+  upcomingShape = clone(state.upcomingShape);
+  bag = clone(state.bag);
+  bagIndex = clone(state.bagIndex);
+  randomSeed = clone(state.randomSeed);
+  score = clone(states.score);
+  
+}
