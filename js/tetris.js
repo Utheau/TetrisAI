@@ -127,8 +127,37 @@ let mutationRate = 0.5;
 function starter() {
   // setting up the starting population
   archive.populationSize = populationSize;
-
+  nextShape();
+  applyShape();
+  saveState = getState();
+  roundState = getState();
+  createInitialPopulation();
+  // inside the game loop 
+  let loop = function () {
+    if (changeSpeed) {
+      clearInterval(interval);
+      interval = setInterval(loop, speed);
+    }
+    // if there is no speed than do not draw
+    if (speed = 0) {
+      draw = false;
+      // 3 updates for fitness, making a move and evaluate the next move
+      update();
+      update();
+      update();
+    } else {
+      draw = true;
+    }
+    // update the status of the game
+    update();
+    if (speed === 0) {
+      draw = true;
+      updateScore();
+    }
+  }
+  let interval = setInterval(loop, speed);
 }
+document.onload = starter();
 
 // key listeners 
 window.onkeydown = function (e) {
@@ -212,8 +241,7 @@ function moveDown() {
     result.clearedRows = clearRows();
     if (collides(grid, currentShape)) {
       result.lose = true;
-      if (ai) {
-      } else {
+      if (ai) {} else {
         reset();
       }
     }
@@ -241,7 +269,7 @@ function moveRight() {
 function moveLeft() {
   removeShape();
   currentShape.x--;
-  if(collides(grid, currentShape)) {
+  if (collides(grid, currentShape)) {
     currentShape.x++;
   }
   applyShape();
@@ -269,6 +297,45 @@ function applyShape() {
       }
     }
   }
+}
+
+// going trough the bag to find the next available shape
+// if almost at the end of the bag, will generate a new one 
+// store the previous seed as randomSeed.
+// otherwise will just get the next shape and define the position of it on the grid  
+function nextShape() {
+  bagIndex += 1;
+  // start or end (bag)
+  if (bag.length === 0 || bagIndex == bag.length) {
+    generateNewBag();
+  }
+  // almost end of bag
+  if (bagIndex == bag.length - 1) {
+    let previousSeed = randomSeed;
+    upcomingShape = randomProp(shapes);
+    randomSeed = previousSeed;
+  } else {
+    upcomingShape = shapes[bag[bagIndex + 1]];
+  }
+  currentShape.shape = shapes[bag[bagIndex]];
+  // position
+  currentShape.x = Math.floor(grid[0].length / 2) - Math.ceil(currentShape.shape[0].lenght / 2);
+  currentShape.y = 0;
+}
+
+// generate a new bag of shapes 
+function generateNewBag() {
+  bag = [];
+  let insideBag = "";
+  for (let i = 0; i < 7; i++) {
+    let shape = randomizeKey(shapes);
+    while (insideBag.indexOf(shape) != -1) {
+      shape = randomizeKey(shapes);
+    }
+    bag[i] = shape;
+    insideBag += shape;
+  }
+  bagIndex = 0;
 }
 
 // creation of the initial population 
@@ -466,7 +533,12 @@ function everyPossibleMove() {
         // update the previous position of X value
         // get the last state
         // return the moves
-        possibleMoves.push({rotations: rotation, tranlations: i, ratings: rating, algorithm: algorithm });
+        possibleMoves.push({
+          rotations: rotation,
+          tranlations: i,
+          ratings: rating,
+          algorithm: algorithm
+        });
         previousX.push(currentShape.x);
       }
     }
@@ -498,5 +570,5 @@ function loadState(state) {
   bagIndex = clone(state.bagIndex);
   randomSeed = clone(state.randomSeed);
   score = clone(states.score);
-  
+
 }
