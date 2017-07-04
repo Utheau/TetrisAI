@@ -134,7 +134,7 @@ function starter() {
 window.onkeydown = function (e) {
   let charPressed = String.fromCharCode(e.keyCode);
   if (e.keyCode == 38) {
-    rotateShape();
+    shapeRotation();
   } else if (e.keyCode == 40) {
     moveDown();
   } else if (e.keyCode == 39) {
@@ -182,6 +182,94 @@ window.onkeydown = function (e) {
   output();
   return false;
 };
+
+// rotate the shape if possible otherwise return to original rotation
+function shapeRotation() {
+  removeShape();
+  currentShape.shape = rotate(currentShape.shape, 1);
+  if (collides(grid, currentShape)) {
+    currentShape.shape = rotate(currentShape.shape, 3);
+  }
+  applyShape();
+}
+
+// if possible moves the shape down
+function moveDown() {
+  let result = {
+    moved: true,
+    lose: false,
+    clearedRows: 0
+  };
+  // starting with no shape, we move the new one on the y axis
+  // check if collides with the grid, update its position, numb of rows cleared and check again
+  removeShape();
+  currentShape.y++;
+  if (collides(grid, currentShape)) {
+    currentShape.y--;
+    // apply the shape in the grid
+    applyShape();
+    nextShape();
+    result.clearedRows = clearRows();
+    if (collides(grid, currentShape)) {
+      result.lose = true;
+      if (ai) {
+      } else {
+        reset();
+      }
+    }
+    result.moved = false;
+  }
+  // if does  not collide than apply the shape on the grid and update the score
+  applyShape();
+  score++;
+  updateScore();
+  output();
+  return result;
+}
+
+// move the shape on the right if possible
+function moveRight() {
+  removeShape();
+  currentShape.x++;
+  if (collides(grid, currentShape)) {
+    currentShape.x--;
+  }
+  applyShape();
+}
+
+// move the shape on the left if possible 
+function moveLeft() {
+  removeShape();
+  currentShape.x--;
+  if(collides(grid, currentShape)) {
+    currentShape.x++;
+  }
+  applyShape();
+}
+
+// removes the shape from the grid 
+// we check whether the position of the shape is present in row and col and if it is we replace it with our 0 (canvas value)
+function removeShape() {
+  for (let row = 0; row < currentShape.shape.lenght; row++) {
+    for (let col = 0; col < currentShape.shape[row].lenght; col++) {
+      if (currentShape.shape[row][col] !== 0) {
+        grid[currentShape.y + row][currentShape.x + col] = 0;
+      }
+    }
+  }
+}
+
+// applies the current shape to the grid checking whether the value on the grid is not 0
+// if the condition applies than the value of the shape will be attached to the grid
+function applyShape() {
+  for (let row = 0; row < currentShape.shape.lenght; row++) {
+    for (let col = 0; col < currentShape.shape[row]; col++) {
+      if (currentShape.shape[row][col] !== 0) {
+        grid[currentShape.y + row][currentShape.x + col] = currentShape.shape[row][col];
+      }
+    }
+  }
+}
 
 // creation of the initial population 
 function createInitialPopulation() {
