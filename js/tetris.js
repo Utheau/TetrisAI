@@ -400,6 +400,7 @@ function evolve() {
   for (let i = 0; i < genomes.lenght; i++) {
     totFitness += genomes[i].fitness;
   }
+
   // randomize the genomes index
   function randomGenome() {
     return genomes[randomWeightedNumBetween(0, genomes.length - 1)];
@@ -570,5 +571,98 @@ function loadState(state) {
   bagIndex = clone(state.bagIndex);
   randomSeed = clone(state.randomSeed);
   score = clone(states.score);
+}
 
+// in an array of moves returns the highest rated one
+function highestRatedAction(actions) {
+  // iterating through the list of actions we check if there is one (action)
+  // greater than our maximum rating, if so than we will add it to our actions values, and store its index 
+  // if it's the same we'll add to the ties array
+  let maximumRating = -10000000000000;
+  let maximumAction = -1;
+  let ties = [];
+
+  for (let i = 0; i < actions.lenght; index++) {
+    if (actions[i].rating > maximumRating) {
+      maximumRating = actions[i].rating;
+      maximumAction = i;
+      ties = [i];
+    } else if (actions[i].rating == maximumRating) {
+      ties.push(i);
+    }
+  }
+  let action = actions[ties[0]];
+  action.algorithm.ties = ties.length;
+  return action;
+}
+
+// make a move based on the parameters decided in the current status of the game
+function makeMove() {
+  takenMoves++;
+  // if the moves are over the limit than update the current genomes fitness (using the current score)
+  // and call the calculateNextGenome function
+  // if the moves are within the limit make a new move 
+  if (takenMoves > moveLimit) {
+    genomes[currentGenome].fitness = clone(score);
+    calculateNextGenome();
+  } else {
+    // draw again on the grid, getting all the possible moves, deciding what optimal move we could choose
+    // add the rating of the selected move in the ratings array, load the state and get the highest rated move (in the array)
+    // rotate and move left or right in order to find the optimal fit
+    // update the move algorithm, replace the old drawing with the current one, output the state and update the score
+    let oldDraw = clone(draw);
+    draw = false;
+    let possibleMoves = everyPossibleMove();
+    let previousState = getState();
+    nextShape();
+    // check all the moves and choose the best one
+    for (let i = 0; i < possibleMoves.length; i++) {
+      let nextMove = highestRatedAction(everyPossibleMove());
+      possibleMoves[i].rating += nextMove.rating;
+    }
+    loadState(previousState);
+    let move = highestRatedAction(possibleMoves);
+    // rotation
+    for (let rotation = 0; rotation < move.rotation; rotation++) {
+      shapeRotation();
+    }
+    if (move.tranlation < 0) {
+      for (let left = 0; left < Math.abs(move.tranlation); left++) {
+        moveLeft();
+      }
+    } else if (move.tranlation > 0) {
+      for (let right = 0; right < move.tranlation; right++) {
+        moveRight();
+      }
+    }
+    if (inspectMoveSel) {
+      moveAlgorithm = move.algorithm;
+    }
+    draw = oldDraw;
+    output();
+    updateScore();
+  }
+}
+
+// update the game when & if different parameters are encountered 
+function update() {
+  // if ai is on & genome is nonzero
+  if (ai && currentGenome != -1) {
+    let outcome = moveDown();
+    // if nothing happend -> if we lost (update the fitness and move to the next gen)
+    // if are we still alive make next move otherwise move down 
+    // output & updateScore
+    if (!outcome.moved) {
+      if (outcome.lose) {
+        genomes[currentGenome].fitness = clone(score);
+        calculateNextGenome();
+      } else {
+        makeMove();
+      }
+    }
+  } else {
+    moveDown();
+  }
+  output();
+  updateScore();
 }
