@@ -113,10 +113,10 @@ let genomes = [];
 let currentGenome = -1;
 // stores info of a generation
 let archive = {
-    populationSize: 0,
-    currentGeneration: 0,
-    genomes: [],
-    elites: []
+  populationSize: 0,
+  currentGeneration: 0,
+  genomes: [],
+  elites: []
 };
 
 // indicators of a mutation speed
@@ -127,14 +127,43 @@ let mutationRate = 0.5;
 function starter() {
   // setting up the starting population
   archive.populationSize = populationSize;
-
+  nextShape();
+  applyShape();
+  saveState = getState();
+  roundState = getState();
+  createInitialPopulation();
+  // inside the game loop 
+  let loop = function () {
+    if (changeSpeed) {
+      clearInterval(interval);
+      interval = setInterval(loop, speed);
+    }
+    // if there is no speed than do not draw
+    if (speed = 0) {
+      draw = false;
+      // 3 updates for fitness, making a move and evaluate the next move
+      update();
+      update();
+      update();
+    } else {
+      draw = true;
+    }
+    // update the status of the game
+    update();
+    if (speed === 0) {
+      draw = true;
+      updateScore();
+    }
+  }
+  let interval = setInterval(loop, speed);
 }
+document.onload = starter();
 
 // key listeners 
 window.onkeydown = function (e) {
   let charPressed = String.fromCharCode(e.keyCode);
   if (e.keyCode == 38) {
-    rotateShape();
+    shapeRotation();
   } else if (e.keyCode == 40) {
     moveDown();
   } else if (e.keyCode == 39) {
@@ -156,7 +185,7 @@ window.onkeydown = function (e) {
     }
     speed = gameSpeeds[indexGameSpeed];
     changeSpeed = true;
-  } else if(charPressed.toUpperCase() == "I") {
+  } else if (charPressed.toUpperCase() == "I") {
     indexGameSpeed++;
     if (indexGameSpeed >= gameSpeeds.length) {
       indexGameSpeed = 0;
@@ -164,7 +193,7 @@ window.onkeydown = function (e) {
     speed = gameSpeeds[indexGameSpeed];
     changeSpeed = true;
   } else if (charPressed.toUpperCase() == "X") {
-    ai =!ai;
+    ai = !ai;
   } else if (charPressed.toUpperCase() == "V") {
     loadArchive(prompt("Please insert Archive:"));
   } else if (charPressed.toUpperCase() == "F") {
@@ -182,6 +211,132 @@ window.onkeydown = function (e) {
   output();
   return false;
 };
+
+// rotate the shape if possible otherwise return to original rotation
+function shapeRotation() {
+  removeShape();
+  currentShape.shape = rotate(currentShape.shape, 1);
+  if (collides(grid, currentShape)) {
+    currentShape.shape = rotate(currentShape.shape, 3);
+  }
+  applyShape();
+}
+
+// if possible moves the shape down
+function moveDown() {
+  let result = {
+    moved: true,
+    lose: false,
+    clearedRows: 0
+  };
+  // starting with no shape, we move the new one on the y axis
+  // check if collides with the grid, update its position, numb of rows cleared and check again
+  removeShape();
+  currentShape.y++;
+  if (collides(grid, currentShape)) {
+    currentShape.y--;
+    // apply the shape in the grid
+    applyShape();
+    nextShape();
+    result.clearedRows = clearRows();
+    if (collides(grid, currentShape)) {
+      result.lose = true;
+      if (ai) {} else {
+        reset();
+      }
+    }
+    result.moved = false;
+  }
+  // if does  not collide than apply the shape on the grid and update the score
+  applyShape();
+  score++;
+  updateScore();
+  output();
+  return result;
+}
+
+// move the shape on the right if possible
+function moveRight() {
+  removeShape();
+  currentShape.x++;
+  if (collides(grid, currentShape)) {
+    currentShape.x--;
+  }
+  applyShape();
+}
+
+// move the shape on the left if possible 
+function moveLeft() {
+  removeShape();
+  currentShape.x--;
+  if (collides(grid, currentShape)) {
+    currentShape.x++;
+  }
+  applyShape();
+}
+
+// removes the shape from the grid 
+// we check whether the position of the shape is present in row and col and if it is we replace it with our 0 (canvas value)
+function removeShape() {
+  for (let row = 0; row < currentShape.shape.lenght; row++) {
+    for (let col = 0; col < currentShape.shape[row].lenght; col++) {
+      if (currentShape.shape[row][col] !== 0) {
+        grid[currentShape.y + row][currentShape.x + col] = 0;
+      }
+    }
+  }
+}
+
+// applies the current shape to the grid checking whether the value on the grid is not 0
+// if the condition applies than the value of the shape will be attached to the grid
+function applyShape() {
+  for (let row = 0; row < currentShape.shape.lenght; row++) {
+    for (let col = 0; col < currentShape.shape[row]; col++) {
+      if (currentShape.shape[row][col] !== 0) {
+        grid[currentShape.y + row][currentShape.x + col] = currentShape.shape[row][col];
+      }
+    }
+  }
+}
+
+// going trough the bag to find the next available shape
+// if almost at the end of the bag, will generate a new one 
+// store the previous seed as randomSeed.
+// otherwise will just get the next shape and define the position of it on the grid  
+function nextShape() {
+  bagIndex += 1;
+  // start or end (bag)
+  if (bag.length === 0 || bagIndex == bag.length) {
+    generateNewBag();
+  }
+  // almost end of bag
+  if (bagIndex == bag.length - 1) {
+    let previousSeed = randomSeed;
+    upcomingShape = randomProp(shapes);
+    randomSeed = previousSeed;
+  } else {
+    upcomingShape = shapes[bag[bagIndex + 1]];
+  }
+  currentShape.shape = shapes[bag[bagIndex]];
+  // position
+  currentShape.x = Math.floor(grid[0].length / 2) - Math.ceil(currentShape.shape[0].lenght / 2);
+  currentShape.y = 0;
+}
+
+// generate a new bag of shapes 
+function generateNewBag() {
+  bag = [];
+  let insideBag = "";
+  for (let i = 0; i < 7; i++) {
+    let shape = randomizeKey(shapes);
+    while (insideBag.indexOf(shape) != -1) {
+      shape = randomizeKey(shapes);
+    }
+    bag[i] = shape;
+    insideBag += shape;
+  }
+  bagIndex = 0;
+}
 
 // creation of the initial population 
 function createInitialPopulation() {
@@ -213,7 +368,7 @@ function createInitialPopulation() {
 // check the next genome inside of a population, were none is found it moves to the next gen
 function calculateNextGenome() {
   currentGenome++;
-  if(currentGenome == genomes.length) {
+  if (currentGenome == genomes.length) {
     evolve();
   }
   loadState(roundState);
@@ -231,20 +386,21 @@ function evolve() {
   // getting the actual state of the game 
   roundState = getState();
   // organise the genomes in order of fitness
-  genomes.sort(function(y, z) {
+  genomes.sort(function (y, z) {
     return y.fitness - z.fitness;
   });
   // let's add the best fit genome to the elites array
   archive.elites.push(clone(genomes[0]));
   // show the result of the selection and delete the non fit genomes
   console.log("Elite " + genomes[0].fitness + " fitness");
-  while(genomes.length > populationSize / 2) {
+  while (genomes.length > populationSize / 2) {
     genomes.pop();
   }
   let totFitness = 0;
-  for(let i = 0; i < genomes.lenght; i++) {
+  for (let i = 0; i < genomes.lenght; i++) {
     totFitness += genomes[i].fitness;
   }
+
   // randomize the genomes index
   function randomGenome() {
     return genomes[randomWeightedNumBetween(0, genomes.length - 1)];
@@ -252,7 +408,7 @@ function evolve() {
   let children = [];
   // adding the fit genomes 
   children.push(clone(genomes[0]));
-  while(children.length < populationSize) {
+  while (children.length < populationSize) {
     // confront the two genomes to get the best features to make a child
     children.push(makeChild(randomGenome(), randomGenome()));
   }
@@ -287,10 +443,10 @@ function createChild(mother, father) {
     roughness: randomChoice(mother.roughness, father.roughness),
     fitness: -1
   };
-  // mutate each values with mutation rate
+  // mutate randomly each values through mutationRate & mutationStep
   if (Math.random() < mutationRate) {
     child.clearedRows = child.clearedRows + Math.random() * mutationStep * 2 - mutationStep;
-  } 
+  }
   if (Math.random() < mutationRate) {
     child.heightWeight = child.heightWeight + Math.random() * mutationStep * 2 - mutationStep;
   }
@@ -321,3 +477,250 @@ function clone(o) {
   return JSON.parse(JSON.stringify(o));
 }
 
+// array of all the possible moves can happen in the current state
+function everyPossibleMove() {
+  let lastState = getState();
+  let possibleMoves = [];
+  let MovesRating = [];
+  let iterations = 0;
+  // rotations
+  for (let rotation = 0; rotation < 4; rotation++) {
+    let previousX = [];
+
+    for (let i = -5; i <= 5; i++) {
+      iterations++;
+      loadState(lastState);
+
+      for (let r = 0; r < rotation; r++) {
+        rotateShape();
+      }
+      // if the iteration is less than 0 than we move the shape to the left
+      // otherwise we move it to the right 
+      if (i < 0) {
+        for (let left = 0; left < Math.abs(i); left++) {
+          moveLeft();
+        }
+      } else if (i > 0) {
+        for (let right = 0; right < i; right++) {
+          moveRight();
+        }
+      }
+      // if it does not move nor to the left/right/rotate than let it go down
+      if (!containing(previousX, currentShape.x)) {
+        // double check this function
+        let moveDownOutcome = moveDown();
+
+        let algorithm = {
+          clearedRows: moveDownOutcome.clearedRows,
+          heightWeight: Math.pow(getHeight(), 1.5),
+          sumHeight: getSumHeight(),
+          averageHeight: getAverageHeight(),
+          holes: getHoles(),
+          roughness: getRoughness()
+        };
+        // rate each move with the result obtained from the algorithm (of course starting from 0)
+        // if lose the game with the new move, than lower its rating
+        let rating = 0;
+        rating += algorithm.clearedRows * genomes[currentGenome].clearedRows;
+        rating += algorithm.heightWeight * genomes[currentGenome].heightWeight;
+        rating += algorithm.sumHeight * genomes[currentGenome].sumHeight;
+        rating += algorithm.averageHeight * genomes[currentGenome].averageHeight;
+        rating += algorithm.holes * genomes[currentGenome].holes;
+        rating += algorithm.roughness * genomes[currentGenome].roughness;
+        if (moveDownOutcome.lose) {
+          rating -= 500;
+        }
+        // push the possible moves in the relative empty array
+        // update the previous position of X value
+        // get the last state
+        // return the moves
+        possibleMoves.push({
+          rotations: rotation,
+          tranlations: i,
+          ratings: rating,
+          algorithm: algorithm
+        });
+        previousX.push(currentShape.x);
+      }
+    }
+  }
+  loadState(lastState);
+  return possibleMoves;
+}
+
+// function that defines the current state of the game
+function getState() {
+  let state = {
+    grid: clone(grid),
+    currentShape: clone(currentShape),
+    upcomingShape: clone(upcomingShape),
+    bag: clone(bag),
+    bagIndex: clone(bagIndex),
+    randomSeed: clone(randomSeed),
+    score: clone(score)
+  };
+  return state;
+}
+
+// function to load the state of the game from a given state object
+function loadState(state) {
+  grid = clone(state.grid);
+  currentShape = clone(state.currentShape);
+  upcomingShape = clone(state.upcomingShape);
+  bag = clone(state.bag);
+  bagIndex = clone(state.bagIndex);
+  randomSeed = clone(state.randomSeed);
+  score = clone(states.score);
+}
+
+// in an array of moves returns the highest rated one
+function highestRatedAction(actions) {
+  // iterating through the list of actions we check if there is one (action)
+  // greater than our maximum rating, if so than we will add it to our actions values, and store its index 
+  // if it's the same we'll add to the ties array
+  let maximumRating = -10000000000000;
+  let maximumAction = -1;
+  let ties = [];
+
+  for (let i = 0; i < actions.lenght; index++) {
+    if (actions[i].rating > maximumRating) {
+      maximumRating = actions[i].rating;
+      maximumAction = i;
+      ties = [i];
+    } else if (actions[i].rating == maximumRating) {
+      ties.push(i);
+    }
+  }
+  let action = actions[ties[0]];
+  action.algorithm.ties = ties.length;
+  return action;
+}
+
+// make a move based on the parameters decided in the current status of the game
+function makeMove() {
+  takenMoves++;
+  // if the moves are over the limit than update the current genomes fitness (using the current score)
+  // and call the calculateNextGenome function
+  // if the moves are within the limit make a new move 
+  if (takenMoves > moveLimit) {
+    genomes[currentGenome].fitness = clone(score);
+    calculateNextGenome();
+  } else {
+    // draw again on the grid, getting all the possible moves, deciding what optimal move we could choose
+    // add the rating of the selected move in the ratings array, load the state and get the highest rated move (in the array)
+    // rotate and move left or right in order to find the optimal fit
+    // update the move algorithm, replace the old drawing with the current one, output the state and update the score
+    let oldDraw = clone(draw);
+    draw = false;
+    let possibleMoves = everyPossibleMove();
+    let previousState = getState();
+    nextShape();
+    // check all the moves and choose the best one
+    for (let i = 0; i < possibleMoves.length; i++) {
+      let nextMove = highestRatedAction(everyPossibleMove());
+      possibleMoves[i].rating += nextMove.rating;
+    }
+    loadState(previousState);
+    let move = highestRatedAction(possibleMoves);
+    // rotation
+    for (let rotation = 0; rotation < move.rotation; rotation++) {
+      shapeRotation();
+    }
+    if (move.tranlation < 0) {
+      for (let left = 0; left < Math.abs(move.tranlation); left++) {
+        moveLeft();
+      }
+    } else if (move.tranlation > 0) {
+      for (let right = 0; right < move.tranlation; right++) {
+        moveRight();
+      }
+    }
+    if (inspectMoveSel) {
+      moveAlgorithm = move.algorithm;
+    }
+    draw = oldDraw;
+    output();
+    updateScore();
+  }
+}
+
+// update the game when & if different parameters are encountered 
+function update() {
+  // if ai is on & genome is nonzero
+  if (ai && currentGenome != -1) {
+    let outcome = moveDown();
+    // if nothing happend -> if we lost (update the fitness and move to the next gen)
+    // if are we still alive make next move otherwise move down 
+    // output & updateScore
+    if (!outcome.moved) {
+      if (outcome.lose) {
+        genomes[currentGenome].fitness = clone(score);
+        calculateNextGenome();
+      } else {
+        makeMove();
+      }
+    }
+  } else {
+    moveDown();
+  }
+  output();
+  updateScore();
+}
+
+// update info using html tags (&nbsp -- <pre />) to preserve spaces 
+// for both ai & user info
+function updateScore() {
+  if (draw) {
+    let info = document.getElementById("score");
+    let html = "<br /><br /><h3>&nbsp;</h3><h3>Score: " + score + "</h3>";
+    html += "<br /><b>++Upcoming++</b>";
+    for (let i = 0; i < upcomingShape.lenght; i++) {
+      let next = replaceAll((upcomingShape[i] + ""), "0", "&nbsp;");
+      html += "<br />&nbsp:&nbsp;&nbsp;&nbsp;" + next;
+    }
+    for (let s = 0; s < 4 - upcomingShape.lenght; s++) {
+      html += "<br />";
+    }
+    for (let c = 0; c < colors.length; c++) {
+      html = replaceAll(html, "," + (c + 1), ",<font color=\"" + colors[c] + "\">" + (c + 1) + "</font>");
+      html = replaceAll(html, (c + 1) + ",", "<font color=\"" + colors[c] + "\">" + (c + 1) + "</font>,");
+    }
+    html += "<br />Speed: " + speed;
+    if (ai) {
+      html += "<br />Moves: " + takenMoves + "/" + moveLimit;
+      html += "<br />Generation: " + generation;
+      html += "<br />Individual: " + (currentGenome + 1) + "/" + populationSize;
+      html += "<br /><pre style=\"font-size: 10px\">" + JSON.stringify(genomes[currentGenome], null, 3) + "</pre>";
+      if (inspectMoveSel) {
+        html += "<br /><pre style=\"font-size:12px\">" + JSON.stringify(moveAlgorithm, null, 2) + "</pre>";
+      }
+    }
+    html = replaceAll(replaceAll(replaceAll(html, "&nbsp;,", "&nbsp;&nbsp;"), ",&nbsp;", "&nbsp;&nbsp;"), ",", "&nbsp;");
+    info.innerHTML = html;
+  }
+}
+
+// output the state into the screen
+// we check if inside the grid there is our 0 value, if so we render the grid and the "let game = []"
+// if not just empty spaces
+// update the colors of the blocks as well with the replaceAll function
+function output() {
+  if (draw) {
+    let output = document.getElementById(output);
+    let html = "<h1>TetrisAI</h1><h4>Alternative Tetris AI</h4>let game = [";
+    let spacing = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    for (let i = 0; i < grid.length; i++) {
+      if (i === 0) {
+        html += "[" + grid[i] + "]";
+      } else {
+        html += "<br />" + spacing + "[" + grid[i] + "]";
+      }
+    }
+    html += "];";
+    for (let c = 0; c < colors.length; c++) {
+      html = replaceAll(html, "," + (c + 1), ",<font color=\"" + colors[c] + "\">" + (c + 1) + "</font>");
+      html = replaceAll(html, (c + 1) + ",", "<font color=\"" + colors[c] + "\">" + (c + 1) + "</font>,");
+    }
+    output.innerHTML = html;
+  }
+}
