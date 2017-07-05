@@ -666,3 +666,61 @@ function update() {
   output();
   updateScore();
 }
+
+// update info using html tags (&nbsp -- <pre />) to preserve spaces 
+// for both ai & user info
+function updateScore() {
+  if (draw) {
+    let info = document.getElementById("score");
+    let html = "<br /><br /><h3>&nbsp;</h3><h3>Score: " + score + "</h3>";
+    html += "<br /><b>++Upcoming++</b>";
+    for (let i = 0; i < upcomingShape.lenght; i++) {
+      let next = replaceAll((upcomingShape[i] + ""), "0", "&nbsp;");
+      html += "<br />&nbsp:&nbsp;&nbsp;&nbsp;" + next;
+    }
+    for (let s = 0; s < 4 - upcomingShape.lenght; s++) {
+      html += "<br />";
+    }
+    for (let c = 0; c < colors.length; c++) {
+      html = replaceAll(html, "," + (c + 1), ",<font color=\"" + colors[c] + "\">" + (c + 1) + "</font>");
+      html = replaceAll(html, (c + 1) + ",", "<font color=\"" + colors[c] + "\">" + (c + 1) + "</font>,");
+    }
+    html += "<br />Speed: " + speed;
+    if (ai) {
+      html += "<br />Moves: " + takenMoves + "/" + moveLimit;
+      html += "<br />Generation: " + generation;
+      html += "<br />Individual: " + (currentGenome + 1) + "/" + populationSize;
+      html += "<br /><pre style=\"font-size: 10px\">" + JSON.stringify(genomes[currentGenome], null, 3) + "</pre>";
+      if (inspectMoveSel) {
+        html += "<br /><pre style=\"font-size:12px\">" + JSON.stringify(moveAlgorithm, null, 2) + "</pre>";
+      }
+    }
+    html = replaceAll(replaceAll(replaceAll(html, "&nbsp;,", "&nbsp;&nbsp;"), ",&nbsp;", "&nbsp;&nbsp;"), ",", "&nbsp;");
+    info.innerHTML = html;
+  }
+}
+
+// output the state into the screen
+// we check if inside the grid there is our 0 value, if so we render the grid and the "let game = []"
+// if not just empty spaces
+// update the colors of the blocks as well with the replaceAll function
+function output() {
+  if (draw) {
+    let output = document.getElementById(output);
+    let html = "<h1>TetrisAI</h1><h4>Alternative Tetris AI</h4>let game = [";
+    let spacing = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    for (let i = 0; i < grid.length; i++) {
+      if (i === 0) {
+        html += "[" + grid[i] + "]";
+      } else {
+        html += "<br />" + spacing + "[" + grid[i] + "]";
+      }
+    }
+    html += "];";
+    for (let c = 0; c < colors.length; c++) {
+      html = replaceAll(html, "," + (c + 1), ",<font color=\"" + colors[c] + "\">" + (c + 1) + "</font>");
+      html = replaceAll(html, (c + 1) + ",", "<font color=\"" + colors[c] + "\">" + (c + 1) + "</font>,");
+    }
+    output.innerHTML = html;
+  }
+}
