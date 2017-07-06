@@ -386,7 +386,7 @@ function createInitialPopulation() {
       // weigth of the row, the more rows are cleared the bigger will be the weight's value
       clearedRows: Math.random() - 0.5,
       // absolute height of the highest column in order to detect the limit 
-      heigthWeight: Math.random() - 0.5,
+      heigthWeighted: Math.random() - 0.5,
       // sum of all the columns
       sumHeight: Math.random() - 0.5,
       // average of the highest and lowest col
@@ -611,7 +611,7 @@ function loadState(state) {
   updateScore();
 }
 
-// return the sum height of all columns
+// returns the sum height of all columns
 function getSumHeight() {
   removeShape();
   let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
@@ -630,7 +630,7 @@ function getSumHeight() {
   return sumHeight;
 }
 
-// return the roughness of the grid
+// returns the roughness of the grid
 function getRoughness() {
   removeShape();
   let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
@@ -649,6 +649,82 @@ function getRoughness() {
   }
   applyShape();
   return roughness;
+}
+
+// returns the different heights ranges of the columns 
+function getAverageHeight() {
+  removeShape();
+  let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+  for (let row = 0; row < grid.length; row++) {
+    for (let col = 0; col < grid[row].length; col++) {
+      if (grid[row][col] !== 0 && tops[col] === 20) {
+        tops[col] = row;
+      }
+    }
+  }
+  applyShape();
+  return Math.max.apply(Math, tops) - Math.min.apply(Math, tops);
+}
+
+// returns the absolute height (biggest column)
+function getHeight() {
+  removeShape();
+  let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+  for (let row = 0; row < grid.length; row++) {
+    for (let col = 0; col < grid[row].length; col++) {
+      if (grid[row][col] !== 0 && tops[col] === 20) {
+        tops[col] = row;
+      }
+    }
+  }
+  applyShape();
+  return Math.min.apply(Math, tops);
+}
+
+// returns the holes present in the grid
+function getHoles() {
+  removeShape();
+  let holes = 0;
+  let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+  for (let row = 0; row < grid.length; row++) {
+    for (let col = 0; col < grid[row].length; col++) {
+      if (grid[row][col] !== 0 && tops[col] === 20) {
+        tops[col] = row;
+      }
+    }
+  }
+  for (let x = 0; x < tops.length; x++) {
+    for (let y = tops[x]; y < grid.length; y++) {
+      if (grid[y][x] === 0) {
+        holes++;
+      }
+    }
+  }
+  applyShape();
+  return holes;
+}
+
+// returns the changed holes in the grid with the value of -1
+function getArrayHoles() {
+  let arr = clone(grid);
+  removeShape();
+  let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+  for (let row = 0; row < grid.length; row++) {
+    for (let col = 0; col < grid[row].length; col++) {
+      if (grid[row][col] !== 0 && tops[col] === 20) {
+        tops[col] = row
+      }
+    }
+  }
+  for (let x = 0; x < tops.length; x++) {
+    for (let y = tops[x]; y < grid.length; y++) {
+      if (grid[y][x] === 0) {
+        arr[y][x] = -1;
+      }
+    }
+  }
+  applyShape();
+  return arr;
 }
 
 // in an array of moves returns the highest rated one
