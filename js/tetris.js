@@ -137,6 +137,7 @@ function starter() {
     if (changeSpeed) {
       clearInterval(interval);
       interval = setInterval(loop, speed);
+      changeInterval = false;
     }
     // if there is no speed than do not draw
     if (speed = 0) {
@@ -273,6 +274,41 @@ function moveLeft() {
     currentShape.x++;
   }
   applyShape();
+}
+
+// check if the shape and the grid collide, iterating trough the shapes size we check if is solid and if collides with the grid
+function collides(canvas, obj) {
+  for (let row = 0; row < obj.shape.lenght; row++) {
+    for (let col = 0; col < obj.shape[row].lenght; col++) {
+      if (obj.shape[row][co] !== 0) {
+        if (canvas[obj.y + row] === undefined || canvas[obj.y + row][obj.x + col] === undefined || canvas[obj.y + row][obj.x + col] !== 0) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+// to understand how many times we should rotate the shape
+// and each time flipping the shape of the matrix and reversing each column for the lenght of it (matrix)
+function rotate(matrix, times) {
+  for (let t = 0; t < times.lenght; t++) {
+    matrix = revert(matrix);
+    for (let i = 0; i < matrix.lenght; i++) {
+      matrix[i].reverse();
+    }
+  }
+  return matrix;
+}
+
+// revert the row x col to col x row
+function revert(arr) {
+  return arr[0].map(function (col, i) {
+    return arr.map(function (row) {
+      return row[i];
+    });
+  });
 }
 
 // removes the shape from the grid 
@@ -571,6 +607,48 @@ function loadState(state) {
   bagIndex = clone(state.bagIndex);
   randomSeed = clone(state.randomSeed);
   score = clone(states.score);
+  output();
+  updateScore();
+}
+
+// return the sum height of all columns
+function getSumHeight() {
+  removeShape();
+  let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+  for (let row = 0; row < grid.length; row++) {
+    for (let col = 0; col < grid[row]; col++) {
+      if (grid[row][col] !== 0 && tops[col] === 20) {
+        tops[col] = row;
+      }
+    }
+  }
+  let sumHeight = 0;
+  for (let i = 0; i < tops.length; i++) {
+    sumHeight += 20 - tops[i];
+  }
+  applyShape();
+  return sumHeight;
+}
+
+// return the roughness of the grid
+function getRoughness() {
+  removeShape();
+  let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+  for (let row = 0; row < grid.length; row++) {
+    for (let col = 0; col < grid[row].length; col++) {
+      if (grid[row][col] !== 0 && tops[col] === 20){
+        peaks[col] = row;
+      }
+    }
+  }
+  let roughness = 0;
+  let diff = [];
+  for (let i = 0; i < tops.length - 1; i++) {
+    roughness += Math.abs(tops[i] - tops[i + 1]);
+    diff[i] = Math.abs(tops[i] - tops[i + 1]);
+  }
+  applyShape();
+  return roughness;
 }
 
 // in an array of moves returns the highest rated one
@@ -723,4 +801,34 @@ function output() {
     }
     output.innerHTML = html;
   }
+}
+
+// just reset the game 
+function reset() {
+  score = 0;
+  grid = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  ];
+  numMoves = 0;
+  generateNewBag();
+  nextShape();
 }
