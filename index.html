@@ -2,22 +2,21 @@
 <html lang="en">
 
 <head>
-  <title>TetrisAI</title>
-  <link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
+  <link rel="shortcut icon" href="img/tetrisThumbnail.ico">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.css">
   <link href="css/style.css" rel="stylesheet">
-  <script src="library/cerebrum.js"></script>
-  <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="
-    crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <title>TetrisAI</title>
 </head>
 
 <body>
-  <div id="output" class="text"></div>
-  <div id="score" class="text"></div>
-  <div id="instructions" class="text"><br /><b>[Key Commands]</b><br />Load Fully Evolved Archive: [CTRL]<br />Speed Up: [I]<br />Slow Down: [D]<br />Toggle
-    AI: [X]<br />Move Shape: [Left & Right arrow keys]<br />Rotate Shape: [Up Arrow]<br />Drop Shape: [Down Arrow]<br />Save State: [A]<br
-    />Load State: [Q]<br />Get Archive: [F]<br />Load Archive: [V]<br />Pick Shape: [I,O,T,S,Z,J,L]</div>
+  <div class="box">
+    <div id="score"></div>
+    <div id="output"></div>
+    <div id="instructions"></div>
+  </div>
   <script src="js/tetris.js"></script>
   <script>
     $(window).keydown(function (e) {
