@@ -1,5 +1,6 @@
 $(document).ready(function () {
 
+  //define the playable board
   let grid = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -23,6 +24,7 @@ $(document).ready(function () {
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   ];
 
+  // shapes of the blocks
   const shapes = {
     I: [
       [0, 0, 0, 0],
@@ -68,39 +70,56 @@ $(document).ready(function () {
     ]
   };
 
+  // colors of the blocks
   const colors = ["cyan", "royalblue", "magenta", "chocolate", "forestgreen", "khaki", "crimson"];
+  // random method to choose the shapes of the blocks
   let rndSeed = 1;
 
   // SHAPES BLOCKS
+  // shapes and coordinates parameter of current block that we can update
   let currentShape = {
     x: 0,
     y: 0,
     shape: undefined
   };
+  // store upcoming shape
   let followingShape;
+  // array to store shapes
   let bag = [];
+  // index for the shapes in the bag
   let bagIndex = 0;
 
   // VALUES OF THE GAME
   let score = 0;
   let speed = 400;
   let changeSpeed = false;
+  // store current game state
   let roundState;
+  // storing the current state so that it can be loaded later
   let saveState;
+  // list of Speeds available for the game
   let gameSpeeds = [600, 400, 200, 100, 50, 5, 1, 0];
   let indexGameSpeed = 1;
+  // turn our AI on or off (so that a player could get in control and play)
   let ai = true;
   let draw = true;
   let takenMoves = 0;
+  // max moves in a generation
   let moveLimit = 500;
+  // 7 moves in the algorithm
   let moveAlgorithm = {};
+  // push to the highest move selection
   let inspectMoveSelection = false;
 
   // ALGORITHM VALUES
+  // stores the number of genomes
   let populationSize = 60;
+  // current number of a generation
   let generation = 0;
+  // stores for genomes
   let genomes = [];
   let currentGenome = -1;
+  // stores info of a generation
   let archive = {
     populationSize: 0,
     currentGeneration: 0,
@@ -110,37 +129,42 @@ $(document).ready(function () {
 
   // indicators of a mutation speed
   let mutationRate = 0.25;
-  let mutationStep = 0.5;
+  let mutationStep = 0.4;
 
+  // calling the main function on load
   function starter() {
     instructions();
+    // setting up the starting population
     archive.populationSize = populationSize;
     nextShape();
     applyShape();
     saveState = getState();
     roundState = getState();
     createInitialPopulation();
+    // inside the game loop 
     let loop = function () {
       if (changeSpeed) {
         clearInterval(interval);
         interval = setInterval(loop, speed);
         changeInterval = false;
       }
+      // if there is no speed than do not draw
       if (speed === 0) {
         draw = false;
+        // 3 updates for fitness, making a move and evaluate the next move
         update();
         update();
         update();
       } else {
         draw = true;
       }
+      // update the status of the game
       update();
       if (speed === 0) {
         draw = true;
         updateScore();
       }
     };
-
     let interval = setInterval(loop, speed);
   }
   document.onLoad = starter();
@@ -193,14 +217,18 @@ $(document).ready(function () {
     } else {
       return true;
     }
+    // shows the game state to the screen 
     output();
     return false;
   };
 
-
+  // creation of the initial population 
   function createInitialPopulation() {
     genomes = [];
+    // for each population randomize the 7 initial values making a genome
+    // each value will be updated through the evolution
     for (let i = 0; i < populationSize; i++) {
+      // 7 key values of a population
       let genome = {
 
         id: Math.random(),
@@ -222,26 +250,33 @@ $(document).ready(function () {
     calculateNextGenome();
   }
 
+  // check the next genome inside of a population, were none is found it moves to the next gen
   function calculateNextGenome() {
     currentGenome++;
     if (currentGenome == genomes.length) {
       evolve();
     }
     loadState(roundState);
+    // reset the moves 
     takenMoves = 0;
     makeMove();
   }
 
+  // evolve 'n go to the next gen
   function evolve() {
     console.log("Gen: " + generation + " has been evaluated.");
     currentGenome = 0;
     generation++;
     reset();
+    // getting the actual state of the game 
     roundState = getState();
+    // organise the genomes in order of fitness
     genomes.sort(function (a, b) {
       return b.fitness - a.fitness;
     });
+    // let's add the best fit genome to the elites array
     archive.elites.push(clone(genomes[0]));
+    // show the result of the selection and delete the non fit genomes
     console.log("The elite fitness is: " + genomes[0].fitness);
     while (genomes.length > populationSize / 2) {
       genomes.pop();
@@ -251,32 +286,39 @@ $(document).ready(function () {
       totFitness += genomes[i].fitness;
     }
 
-
+    // randomize the genomes index
     function randomGenome() {
 
       return genomes[randomWeightedNumBetween(0, genomes.length - 1)];
     }
     let children = [];
+    // adding the fit genomes 
     children.push(clone(genomes[0]));
     while (children.length < populationSize) {
+      // confront the two genomes to get the best features to make a child
       children.push(createChild(randomGenome(), randomGenome()));
     }
     genomes = [];
+    // store all the new children in the new genomes array
     genomes = genomes.concat(children);
     archive.genomes = clone(genomes);
+    // setting current gene
     archive.currentGeneration = clone(generation);
     console.log(JSON.stringify(archive));
+    // store our new archive in the short term memory (localStorage)
     localStorage.setItem("archive", JSON.stringify(archive));
   }
 
+  // main part for the creation of the new genomes generation
+  // JSDoc to define documentation
   /**
    * @param {Genome} mother - First parent's genome
    * @param {Genome} father - Second parent's genome
    * @return {Genome} 
    */
 
-  // creation of the child with random values from mother and father genomes
   function createChild(mother, father) {
+    // creation of the child with random values from mother and father genomes
     let child = {
       id: Math.random(),
       clearedRows: randomChoice(mother.clearedRows, father.clearedRows),
@@ -287,7 +329,7 @@ $(document).ready(function () {
       roughness: randomChoice(mother.roughness, father.roughness),
       fitness: genomes[0].fitness
     };
-
+    // mutate randomly each values through mutationRate & mutationStep
     if (Math.random() < mutationRate) {
       child.clearedRows = child.clearedRows + Math.random() * mutationStep * 2 - mutationStep;
     }
@@ -309,7 +351,7 @@ $(document).ready(function () {
     return child;
   }
 
-
+  // array of all the possible moves can happen in the current state
   function everyPossibleMove() {
     let lastState = getState();
     let possibleMoves = [];
@@ -323,7 +365,8 @@ $(document).ready(function () {
         for (let j = 0; j < rots; j++) {
           shapeRotation();
         }
-
+        // if the iteration is less than 0 than we move the shape to the left
+        // otherwise we move it to the right 
         if (t < 0) {
           for (let l = 0; l < Math.abs(t); l++) {
             moveLeft();
@@ -333,13 +376,13 @@ $(document).ready(function () {
             moveRight();
           }
         }
+        // if it does not move nor to the left/right/rotate than let it go down
 
         if (!contains(previousX, currentShape.x)) {
           let moveDownOutcome = moveDown();
           while (moveDownOutcome.moved) {
             moveDownOutcome = moveDown();
           }
-
           let algorithm = {
             clearedRows: moveDownOutcome.clearedRows,
             heightWeighted: Math.pow(getHeight(), 1.5),
@@ -348,7 +391,8 @@ $(document).ready(function () {
             holes: getHoles(),
             roughness: getRoughness()
           };
-
+          // rate each move with the result obtained from the algorithm (of course starting from 0)
+          // if lose the game with the new move, than lower its rating
           let rating = 0;
           rating += algorithm.clearedRows * genomes[currentGenome].clearedRows;
           rating += algorithm.heightWeighted * genomes[currentGenome].heightWeighted;
@@ -360,6 +404,10 @@ $(document).ready(function () {
           if (moveDownOutcome.lose) {
             rating -= 500;
           }
+          // push the possible moves in the relative empty array
+          // update the previous position of X value
+          // get the last state
+          // return the moves
           possibleMoves.push({
             rotations: rots,
             translation: t,
@@ -374,10 +422,10 @@ $(document).ready(function () {
     return possibleMoves;
   }
 
-  // iterating through the list of moves we check if there is one (Move)
-  // greater than our maximum rating, if so than we will add it to our moves values, and store its index 
-  // if it's the same we'll add to the ties array
   function highestRatedMove(moves) {
+    // iterating through the list of moves we check if there is one (Move)
+    // greater than our maximum rating, if so than we will add it to our moves values, and store its index 
+    // if it's the same we'll add to the ties array
     let maximumRating = -100000000000000;
     let maximumMove = -1;
     let ties = [];
@@ -396,24 +444,33 @@ $(document).ready(function () {
     return move;
   }
 
-
+  // make a move based on the parameters decided in the current status of the game
   function makeMove() {
     takenMoves++;
+    // if the moves are over the limit than update the current genomes fitness (using the current score)
+    // and call the calculateNextGenome()unction
+    // if the moves are within the limit make a new move 
     if (takenMoves > moveLimit) {
       genomes[currentGenome].fitness = clone(score);
       calculateNextGenome();
     } else {
+      // draw again on the grid, getting all the possible moves, deciding what optimal move we could choose
+      // add the rating of the selected move in the ratings array, load the state and get the highest rated move (in the array)
+      // rotate and move left or right in order to find the optimal fit
+      // update the move algorithm, replace the old drawing with the current one, output the state and update the score
       let oldDraw = clone(draw);
       draw = false;
       let possibleMoves = everyPossibleMove();
       let previousState = getState();
       nextShape();
+      // check all the moves and choose the best one
       for (let i = 0; i < possibleMoves.length; i++) {
         let nextMove = highestRatedMove(everyPossibleMove());
         possibleMoves[i].rating += nextMove.rating;
       }
       loadState(previousState);
       let move = highestRatedMove(possibleMoves);
+      // rotation
       for (let rotations = 0; rotations < move.rotations; rotations++) {
         shapeRotation();
       }
@@ -435,7 +492,7 @@ $(document).ready(function () {
     }
   }
 
-
+  // returns the sum height of all columns
   function getSumHeight() {
     removeShape();
     let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
@@ -455,7 +512,7 @@ $(document).ready(function () {
   }
 
 
-
+  // returns the holes present in the grid
   function getHoles() {
     removeShape();
 
@@ -479,7 +536,7 @@ $(document).ready(function () {
     return holes;
   }
 
-
+  // returns the changed holes in the grid with the value of -1
   function getArrayHoles() {
     let array = clone(grid);
     removeShape();
@@ -502,7 +559,7 @@ $(document).ready(function () {
     return array;
   }
 
-
+  // returns the roughness of the grid
   function getRoughness() {
     removeShape();
     let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
@@ -523,7 +580,7 @@ $(document).ready(function () {
     return roughness;
   }
 
-
+  // returns the different heights ranges of the columns 
   function getAverageHeight() {
     removeShape();
     let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
@@ -535,10 +592,12 @@ $(document).ready(function () {
       }
     }
     applyShape();
+    // the function Math.max.apply serves to return the maximum value of an array (in this case numbers thanks to the apply fn)
+    // without apply will not work because max or min do not accept arrays as values 
     return Math.max.apply(Math, tops) - Math.min.apply(Math, tops);
   }
 
-
+  // returns the absolute height (biggest column)
   function getHeight() {
     removeShape();
     let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
@@ -553,17 +612,20 @@ $(document).ready(function () {
     return 20 - Math.min.apply(Math, tops);
   }
 
-
+  // if possible moves the shape down
   function moveDown() {
     let result = {
       moved: true,
       lose: false,
       clearedRows: 0
     };
+    // starting with no shape, we move the new one on the y axis
+    // check if collides with the grid, update its position, numb of rows cleared and check again
     removeShape();
     currentShape.y++;
     if (collides(grid, currentShape)) {
       currentShape.y--;
+      // apply the shape in the grid
       applyShape();
       nextShape();
       result.clearedRows = clearRows();
@@ -575,6 +637,7 @@ $(document).ready(function () {
       }
       result.moved = false;
     }
+    // if does  not collide than apply the shape on the grid and update the score
     applyShape();
     score++;
     updateScore();
@@ -582,7 +645,7 @@ $(document).ready(function () {
     return result;
   }
 
-
+  // move the shape on the right if possible
   function moveRight() {
     removeShape();
     currentShape.x++;
@@ -592,7 +655,7 @@ $(document).ready(function () {
     applyShape();
   }
 
-
+  // move the shape on the left if possible 
   function moveLeft() {
     removeShape();
     currentShape.x--;
@@ -626,7 +689,7 @@ $(document).ready(function () {
         toBeCleared.push(row);
       }
     }
-
+    // adding score following the original tetris rules
     if (toBeCleared.length == 1) {
       score += 400;
     } else if (toBeCleared.length == 2) {
@@ -636,6 +699,7 @@ $(document).ready(function () {
     } else if (toBeCleared.length == 4) {
       score += 12000;
     }
+    // create new arr for cleared rows and removed them from the grid
     let clearedRows = clone(toBeCleared.length);
     for (let toBe = toBeCleared.length - 1; toBe >= 0; toBe--) {
       grid.splice(toBeCleared[toBe], 1);
@@ -646,7 +710,8 @@ $(document).ready(function () {
     return clearedRows;
   }
 
-
+  // applies the current shape to the grid checking whether the value on the grid is not 0
+  // if the condition applies than the value of the shape will be attached to the grid
   function applyShape() {
     for (let row = 0; row < currentShape.shape.length; row++) {
       for (let col = 0; col < currentShape.shape[row].length; col++) {
@@ -657,7 +722,8 @@ $(document).ready(function () {
     }
   }
 
-
+  // removes the shape from the grid 
+  // we check whether the position of the shape is present in row and col and if it is we replace it with our 0 (canvas value)
   function removeShape() {
     for (let row = 0; row < currentShape.shape.length; row++) {
       for (let col = 0; col < currentShape.shape[row].length; col++) {
@@ -668,7 +734,10 @@ $(document).ready(function () {
     }
   }
 
-
+  // going trough the bag to find the next available shape
+  // if almost at the end of the bag, will generate a new one 
+  // store the previous seed as rndSeed.
+  // otherwise will just get the next shape and define the position of it on the grid  
   function nextShape() {
     bagIndex += 1;
     // start or end (bag)
@@ -685,12 +754,12 @@ $(document).ready(function () {
       followingShape = shapes[bag[bagIndex + 1]];
     }
     currentShape.shape = shapes[bag[bagIndex]];
-
+    // position
     currentShape.x = Math.floor(grid[0].length / 2) - Math.ceil(currentShape.shape[0].length / 2);
     currentShape.y = 0;
   }
 
-
+  // generate a new bag of shapes 
   function generateNewBag() {
     bag = [];
     let insideBag = "";
@@ -705,6 +774,7 @@ $(document).ready(function () {
     bagIndex = 0;
   }
 
+  // check if the shape and the grid collide, iterating trough the shapes size we check if is solid and if collides with the grid
   function collides(canvas, obj) {
     for (let row = 0; row < obj.shape.length; row++) {
       for (let col = 0; col < obj.shape[row].length; col++) {
@@ -718,6 +788,8 @@ $(document).ready(function () {
     return false;
   }
 
+  // to understand how many times we should rotate the shape
+  // and each time flipping the shape of the matrix and reversing each column for the length of it (matrix)
   function rotate(matrix, times) {
     for (let t = 0; t < times; t++) {
       matrix = revert(matrix);
@@ -728,7 +800,7 @@ $(document).ready(function () {
     return matrix;
   }
 
-
+  // revert the row x col to col x row
   function revert(array) {
     return array[0].map(function (col, i) {
       return array.map(function (row) {
@@ -737,10 +809,14 @@ $(document).ready(function () {
     });
   }
 
-
+  // update the game when & if different parameters are encountered 
   function update() {
+    // if ai is on & genome is nonzero
     if (ai && currentGenome != -1) {
       let outcome = moveDown();
+      // if nothing happend -> if we lost (update the fitness and move to the next gen)
+      // if are we still alive make next move otherwise move down 
+      // output & updateScore
       if (!outcome.moved) {
         if (outcome.lose) {
           genomes[currentGenome].fitness = clone(score);
@@ -756,7 +832,7 @@ $(document).ready(function () {
     updateScore();
   }
 
-
+  // just reset the game 
   function reset() {
     score = 0;
     grid = [
@@ -786,7 +862,7 @@ $(document).ready(function () {
     nextShape();
   }
 
-
+  // output the state into the screen
   function output() {
     if (draw) {
       let output = $('#output');
@@ -813,7 +889,7 @@ $(document).ready(function () {
     }
   }
 
-
+  // update & render the score 
   function updateScore() {
     if (draw) {
       let info = $('#score');
@@ -856,7 +932,7 @@ $(document).ready(function () {
     }
   }
 
-
+  // render the instuctions on the screen
   function instructions() {
     let instruction = $('#instructions');
     instruction.empty();
@@ -889,7 +965,7 @@ $(document).ready(function () {
     instruction.append(bodyInfo);
   }
 
-
+  // function that defines the current state of the game
   function getState() {
     let state = {
       grid: clone(grid),
@@ -903,7 +979,7 @@ $(document).ready(function () {
     return state;
   }
 
-
+  // function to load the state of the game from a given state object
   function loadState(state) {
     grid = clone(state.grid);
     currentShape = clone(state.currentShape);
@@ -916,7 +992,7 @@ $(document).ready(function () {
     updateScore();
   }
 
-
+  // loads the archive
   function loadArchive(archiveString) {
     archive = JSON.parse(archiveString);
     genomes = clone(archive.genomes);
@@ -928,7 +1004,7 @@ $(document).ready(function () {
     console.log("The archive has been loaded.");
   }
 
-
+  // clones an obj
   function clone(obj) {
     return JSON.parse(JSON.stringify(obj));
   }
@@ -947,7 +1023,7 @@ $(document).ready(function () {
     return target.replace(new RegExp(search, 'g'), replacement);
   }
 
-
+  // return a random num determined from a seeded num generator
   function seededRandom(min, max) {
     max = max || 1;
     min = min || 0;
