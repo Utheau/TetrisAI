@@ -1,31 +1,176 @@
- body {
-   background-color: #272821;
- }
+  @font-face {
+    font-family: Tetris2;
+    src: local("Tetris 2");
+    font-family: tetris3;
+    src: local('tetrominoes');
+  }
 
- .text {
-   color: #706C5A;
-   font-family: Inconsolata, Courier, monospace;
-   font-size: 20px;
- }
+  * {
+    box-sizing: border-box;
+  }
 
- #output {
-   float: left;
-   padding-left: 20%;
- }
+  html {
+    height: 100%;
+    width: 100%;
+  }
+  body {
+    width: 100%;
+    background-color: #BDBCB7;
+    border: 18px solid transparent;
+    border-image: url('../img/borders.jpg') 10% round;
+  }
 
- #score {
-   padding-left: 55%;
- }
+  li {
+    list-style: none;
+    list-style-position: outside;
+  }
 
- #instructions {
-   float: left;
-   position: absolute;
-   left: 1.5%;
-   bottom: 3%;
-   font-size: small;
-   line-height: 110%;
- }
- 
- a:link {
-   color: inherit;
- }
+  .scorestyle {
+    font-family: tetris2;
+    padding: 20px;
+    margin-top: -20px;
+  }
+
+  .box {
+    width: 100%;
+    height: 100%;
+    background: url('./../img/back1.png') center fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-clip: padding-box;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-around;
+  }
+
+  .upcomingShapeCol {
+    background: linear-gradient(to right, cyan, royalblue, magenta, mistyrose, forestgreen, khaki);
+  }
+
+  .row {
+    display: flex;
+    flex-flow: row nowrap;
+  }
+
+  .play {
+    border: 1px solid;
+    border-top: none;
+    display: inline-block;
+  }
+
+  .cell {
+    width: 27.5px;
+    height: 27.5px;
+    border: 1px solid white;
+  }
+
+  .genome {
+    word-wrap: break-word;
+  }
+
+  .movesScore {
+    width: 100%;
+    height: auto;
+    word-wrap: break-word;
+  }
+
+  .title {
+    font-family: tetris3;
+    font-size: 2.5em;
+    color: cyan;
+  }
+
+  .genome {
+    margin-top: 10px;
+    font-size: large;
+  }
+
+  .infoHeader {
+    text-justify: newspaper;
+    color: pink;
+    font-size: 1.5em;
+  }
+
+  .bodyInfo {
+    text-align: justify;
+    font-size: x-large;
+    margin-bottom: 20px;
+  }
+
+  .subtitle {
+    color: lightcyan;
+    font-family: tetris3;
+    font-size: large;
+    text-align: center;
+  }
+
+  #li1 {
+    color: cornflowerblue;
+  }
+
+  #li2 {
+    color: seagreen;
+  }
+
+  #li3 {
+    color: magenta;
+  }
+
+  #li4 {
+    color: palegoldenrod;
+  }
+
+  #li5 {
+    color: limegreen;
+  }
+
+  #li6 {
+    color: deepskyblue;
+  }
+
+  #li7 {
+    color: deeppink;
+  }
+
+  #li8 {
+    color: lightslategray;
+  }
+
+  #li9 {
+    color: cyan;
+  }
+
+  #output {
+    width: 40%;
+    border: 8px solid transparent;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+  }
+
+  #score {
+    display: flex;
+    flex-direction: column;
+    float: left;
+    width: 30%;
+    color: yellow;
+    font-family: Tetris2;
+    font-kerning: normal;
+    font-size: x-large;
+    border: 15px solid transparent;
+  }
+
+  #instructions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: nowrap;
+    padding-left: 50px;
+    padding-top: 100px;
+    width: 30%;
+    color: pink;
+    font-family: Tetris2;
+    font-size: xx-large;
+    text-justify: auto;
+    border: 10px solid transparent;
+  }
