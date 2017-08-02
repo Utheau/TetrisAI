@@ -2,12 +2,15 @@
 <html lang="en">
 
 <head>
-  <link rel="shortcut icon" href="img/tetrisThumbnail.ico">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <script
+  src="http://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.css">
+  <link rel="shortcut icon" href="img/tetrisThumbnail.ico">
   <link href="css/style.css" rel="stylesheet">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <title>TetrisAI</title>
 </head>
 
@@ -18,19 +21,18 @@
     <div id="instructions"></div>
   </div>
   <script src="js/tetris.js"></script>
-  <script>
+  <script type="text/javascript">
     $(window).keydown(function (e) {
       if (e.ctrlKey) {
-        let archiveJSON = $.ajax({
+        let archive = $.ajax({
           url: "./archive.json",
           async: false
         }).responseText;
-        loadArchive(archiveJSON);
+        loadArchive(archive);
         alert("The archive was loaded successfully");
       }
     });
   </script>
-  <script type="text/javascript"></script>
 </body>
 
 </html>
