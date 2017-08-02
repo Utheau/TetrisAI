@@ -1,23 +1,33 @@
   @font-face {
-    font-family: Tetris2;
-    src: local("Tetris 2");
-    font-family: tetris3;
+    font-family: 'tetris2';
+    src: local("../fonts/Tetris2.ttf");
+    font-family: 'tetris3';
     src: local('tetrominoes');
   }
+  @font-face {
+    font-family: 'tetris4';
+    src: local('Walk Around the Block'); 
+  }
+   
 
   * {
     box-sizing: border-box;
   }
 
-  html {
+   html {
     height: 100%;
     width: 100%;
-  }
+  } 
+
   body {
-    width: 100%;
+    position: absolute;
+    width: auto;
+    height: auto;
     background-color: #BDBCB7;
     border: 18px solid transparent;
     border-image: url('../img/borders.jpg') 10% round;
+    margin: 0;
+    padding: 0;
   }
 
   li {
@@ -26,9 +36,7 @@
   }
 
   .scorestyle {
-    font-family: tetris2;
-    padding: 20px;
-    margin-top: -20px;
+    font-family: tetris4;
   }
 
   .box {
@@ -59,42 +67,55 @@
   }
 
   .cell {
-    width: 27.5px;
-    height: 27.5px;
-    border: 1px solid white;
+    width: 25.5px;
+    height: 25.5px;
+    border: 1px outset lightslategray;
   }
 
-  .genome {
-    word-wrap: break-word;
-  }
-
-  .movesScore {
+  .scorestyle {
+    font-family: tetris4;
+    color: gold;
+    font-size: x-large;
     width: 100%;
     height: auto;
     word-wrap: break-word;
   }
 
-  .title {
-    font-family: tetris3;
-    font-size: 2.5em;
-    color: cyan;
+  .shapesty {
+    font-family: tetris2;
+    color: gold;
+    font-size: x-large;
+    width: 100%;
+    height: auto;
+    word-wrap: break-word;
   }
 
   .genome {
-    margin-top: 10px;
-    font-size: large;
+    font-family: tetris2;
+    word-wrap: break-word;
   }
 
-  .infoHeader {
-    text-justify: newspaper;
-    color: pink;
-    font-size: 1.5em;
+  .speedScore {
+    font-family: tetris2;
+    color: gold;
+    font-size: 150%;
+    width: 100%;
+    word-wrap: break-word;
   }
 
-  .bodyInfo {
-    text-align: justify;
-    font-size: x-large;
-    margin-bottom: 20px;
+  .movesScore {
+    font-family: tetris2;
+    color: gold;
+    font-size: 145%;
+    width: 91%;
+    word-wrap: break-word;
+  }
+
+  .title {
+    font-family: tetris3;
+    font-size: xx-large;
+    color: cyan;
+    text-align: center;
   }
 
   .subtitle {
@@ -102,6 +123,22 @@
     font-family: tetris3;
     font-size: large;
     text-align: center;
+  }
+
+  .genome {
+    margin-top: 10px;
+    font-size: 70%;
+  }
+
+  .infoHeader {
+    text-justify: newspaper;
+    color: pink;
+    font-size: xx-large;
+  }
+
+  .bodyInfo {
+    text-align: justify;
+    font-size: 55%;
   }
 
   #li1 {
@@ -140,9 +177,13 @@
     color: cyan;
   }
 
+  #li10 {
+    color: firebrick;
+  }
+
   #output {
     width: 40%;
-    border: 8px solid transparent;
+    border: 1px solid transparent;
     display: flex;
     flex-flow: column;
     align-items: center;
@@ -153,11 +194,7 @@
     flex-direction: column;
     float: left;
     width: 30%;
-    color: yellow;
-    font-family: Tetris2;
-    font-kerning: normal;
-    font-size: x-large;
-    border: 15px solid transparent;
+    border: 10px solid transparent;
   }
 
   #instructions {
@@ -166,10 +203,10 @@
     align-items: center;
     flex-wrap: nowrap;
     padding-left: 50px;
-    padding-top: 100px;
+    padding-top: 2%;
     width: 30%;
     color: pink;
-    font-family: Tetris2;
+    font-family: tetris2;
     font-size: xx-large;
     text-justify: auto;
     border: 10px solid transparent;
