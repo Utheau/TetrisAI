@@ -1,5 +1,3 @@
-$(document).ready(function () {
-
   //define the playable board
   let grid = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -77,7 +75,7 @@ $(document).ready(function () {
 
   // SHAPES BLOCKS
   // shapes and coordinates parameter of current block that we can update
-  let currentShape = {
+  let actualShape = {
     x: 0,
     y: 0,
     shape: undefined
@@ -170,7 +168,7 @@ $(document).ready(function () {
   document.onLoad = starter();
 
   // key listeners 
-  window.onkeydown = function () {
+  window.onkeydown = function (event) {
     let characterPressed = String.fromCharCode(event.keyCode);
     if (event.keyCode == 38) {
       shapeRotation();
@@ -182,7 +180,7 @@ $(document).ready(function () {
       moveLeft();
     } else if (shapes[characterPressed.toUpperCase()] !== undefined) {
       removeShape();
-      currentShape.shape = shapes[characterPressed.toUpperCase()];
+      actualShape.shape = shapes[characterPressed.toUpperCase()];
       applyShape();
     } else if (characterPressed.toUpperCase() == "A") {
       saveState = getState();
@@ -378,7 +376,7 @@ $(document).ready(function () {
         }
         // if it does not move nor to the left/right/rotate than let it go down
 
-        if (!contains(previousX, currentShape.x)) {
+        if (!contains(previousX, actualShape.x)) {
           let moveDownOutcome = moveDown();
           while (moveDownOutcome.moved) {
             moveDownOutcome = moveDown();
@@ -414,7 +412,7 @@ $(document).ready(function () {
             rating: rating,
             algorithm: algorithm
           });
-          previousX.push(currentShape.x);
+          previousX.push(actualShape.x);
         }
       }
     }
@@ -622,14 +620,14 @@ $(document).ready(function () {
     // starting with no shape, we move the new one on the y axis
     // check if collides with the grid, update its position, numb of rows cleared and check again
     removeShape();
-    currentShape.y++;
-    if (collides(grid, currentShape)) {
-      currentShape.y--;
+    actualShape.y++;
+    if (collides(grid, actualShape)) {
+      actualShape.y--;
       // apply the shape in the grid
       applyShape();
       nextShape();
       result.clearedRows = clearRows();
-      if (collides(grid, currentShape)) {
+      if (collides(grid, actualShape)) {
         result.lose = true;
         if (ai) {} else {
           reset();
@@ -648,9 +646,9 @@ $(document).ready(function () {
   // move the shape on the right if possible
   function moveRight() {
     removeShape();
-    currentShape.x++;
-    if (collides(grid, currentShape)) {
-      currentShape.x--;
+    actualShape.x++;
+    if (collides(grid, actualShape)) {
+      actualShape.x--;
     }
     applyShape();
   }
@@ -658,9 +656,9 @@ $(document).ready(function () {
   // move the shape on the left if possible 
   function moveLeft() {
     removeShape();
-    currentShape.x--;
-    if (collides(grid, currentShape)) {
-      currentShape.x++;
+    actualShape.x--;
+    if (collides(grid, actualShape)) {
+      actualShape.x++;
     }
     applyShape();
   }
@@ -668,9 +666,9 @@ $(document).ready(function () {
   // rotate the shape if possible otherwise return to original rotation
   function shapeRotation() {
     removeShape();
-    currentShape.shape = rotate(currentShape.shape, 1);
-    if (collides(grid, currentShape)) {
-      currentShape.shape = rotate(currentShape.shape, 3);
+    actualShape.shape = rotate(actualShape.shape, 1);
+    if (collides(grid, actualShape)) {
+      actualShape.shape = rotate(actualShape.shape, 3);
     }
     applyShape();
   }
@@ -713,10 +711,10 @@ $(document).ready(function () {
   // applies the current shape to the grid checking whether the value on the grid is not 0
   // if the condition applies than the value of the shape will be attached to the grid
   function applyShape() {
-    for (let row = 0; row < currentShape.shape.length; row++) {
-      for (let col = 0; col < currentShape.shape[row].length; col++) {
-        if (currentShape.shape[row][col] !== 0) {
-          grid[currentShape.y + row][currentShape.x + col] = currentShape.shape[row][col];
+    for (let row = 0; row < actualShape.shape.length; row++) {
+      for (let col = 0; col < actualShape.shape[row].length; col++) {
+        if (actualShape.shape[row][col] !== 0) {
+          grid[actualShape.y + row][actualShape.x + col] = actualShape.shape[row][col];
         }
       }
     }
@@ -725,10 +723,10 @@ $(document).ready(function () {
   // removes the shape from the grid 
   // we check whether the position of the shape is present in row and col and if it is we replace it with our 0 (canvas value)
   function removeShape() {
-    for (let row = 0; row < currentShape.shape.length; row++) {
-      for (let col = 0; col < currentShape.shape[row].length; col++) {
-        if (currentShape.shape[row][col] !== 0) {
-          grid[currentShape.y + row][currentShape.x + col] = 0;
+    for (let row = 0; row < actualShape.shape.length; row++) {
+      for (let col = 0; col < actualShape.shape[row].length; col++) {
+        if (actualShape.shape[row][col] !== 0) {
+          grid[actualShape.y + row][actualShape.x + col] = 0;
         }
       }
     }
@@ -753,10 +751,10 @@ $(document).ready(function () {
     } else {
       followingShape = shapes[bag[bagIndex + 1]];
     }
-    currentShape.shape = shapes[bag[bagIndex]];
+    actualShape.shape = shapes[bag[bagIndex]];
     // position
-    currentShape.x = Math.floor(grid[0].length / 2) - Math.ceil(currentShape.shape[0].length / 2);
-    currentShape.y = 0;
+    actualShape.x = Math.floor(grid[0].length / 2) - Math.ceil(actualShape.shape[0].length / 2);
+    actualShape.y = 0;
   }
 
   // generate a new bag of shapes 
@@ -868,9 +866,9 @@ $(document).ready(function () {
       let output = $('#output');
       output.empty();
       let title = $('<div>').addClass('title');
-      title.html('<h2>TetrisAI</h2>');
+      title.html('<p>TetrisAI</p>');
       let subtitle = $('<div>').addClass('subtitle');
-      subtitle.append('<h1>&nbsp;</h1><h3>The evolution of Tetris</h3>');
+      subtitle.append('<p>The evolution of Tetris</p>');
       output.append(title);
       output.append(subtitle);
       let playground = $('<div>').addClass('play');
@@ -917,7 +915,7 @@ $(document).ready(function () {
         movesScore.html('Moves: ' + takenMoves + '/' + moveLimit + '<br />\
                       Generation: ' + generation + '<br />\
                       Genome: ' + (currentGenome + 1) + '/' + populationSize + '<br />\
-                      <div class= "genome">' + JSON.stringify(genomes[currentGenome], null, 3) + '</div>');
+                      <div class= "genome">' + JSON.stringify(genomes[currentGenome], null, '  ') + '</div>');
       }
       let moveSelScore = $('<div>').addClass('moveSelScore');
       if (inspectMoveSelection) {
@@ -940,25 +938,27 @@ $(document).ready(function () {
     infoHeader.html('<h4>Key Commands</h4>');
     let bodyInfo = $('<div>').addClass('bodyInfo');
     bodyInfo.html("<ul>\
-                        <li id='li1'>Speed Up [B]</li>\
+                        <li id='li1'>Activate / Deactivate AI [X]</li>\
                         <br />\
-                        <li id='li2'>Slow Down [N]</li>\
-                        <br />\
-                        <li id='li3'>Activate / Deactivate AI [X]</li>\
-                        <br />\
-                        <li id='li4'>Move Shape [Left & Right\
+                        <li id='li2'>Move Shape [Left & Right\
                         &nbsp;&nbsp;Arrow Keys]\
                         <br /><br />\
-                        <li id='li5'>Rotate Shape [Up Arrow]</li>\
-                        <br />\
-                        <li id='li6'>Move Down Shape [Down \
+                        <li id='li3'>Move Down Shape [Down \
                           &nbsp;&nbsp;Arrow]</li>\
                         <br />\
-                        <li id='li7'>Save Current State [A]</li>\
+                        <li id='li4'>Rotate Shape [Up Arrow]</li>\
                         <br />\
-                        <li id='li8'>Load Saved State [Q]</li>\
+                        <li id='li5'>Speed Up [B]</li>\
                         <br />\
-                        <li id='li9'>Choose Shape [O, T, I, L, J, Z, S]\
+                        <li id='li6'>Slow Down [N]</li>\
+                        <br />\
+                        <li id='li7'>Load a full evolve Generation [CTRL]</li>\
+                        <br />\
+                        <li id='li8'>Save Current State [A]</li>\
+                        <br />\
+                        <li id='li9'>Load Saved State [Q]</li>\
+                        <br />\
+                        <li id='li10'>Choose Shape [O, T, I, L, J, Z, S]\
                         </ul>");
 
     instruction.append(infoHeader);
@@ -969,7 +969,7 @@ $(document).ready(function () {
   function getState() {
     let state = {
       grid: clone(grid),
-      currentShape: clone(currentShape),
+      actualShape: clone(actualShape),
       followingShape: clone(followingShape),
       bag: clone(bag),
       bagIndex: clone(bagIndex),
@@ -982,7 +982,7 @@ $(document).ready(function () {
   // function to load the state of the game from a given state object
   function loadState(state) {
     grid = clone(state.grid);
-    currentShape = clone(state.currentShape);
+    actualShape = clone(state.actualShape);
     followingShape = clone(state.followingShape);
     bag = clone(state.bag);
     bagIndex = clone(state.bagIndex);
@@ -1059,4 +1059,3 @@ $(document).ready(function () {
     }
     return false;
   }
-});
