@@ -22,7 +22,7 @@
   body {
     position: absolute;
     width: auto;
-    height: auto;
+    height: 100%;
     background-color: #BDBCB7;
     border: 18px solid transparent;
     border-image: url('../img/borders.jpg') 10% round;
