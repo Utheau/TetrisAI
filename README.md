@@ -6,7 +6,7 @@
 
                This is a screenshot of the TetrisAI in action at Generation 13
 To see the demo live and play with it [go here](https://rawgit.com/Utheau/TetrisAI/master/index.html
-) 
+) and more important to see a fully evolved generation, and compare the difference between generation 0 and generation 13, press the CTRL key!
                
 ## What is TetrisAI
 
