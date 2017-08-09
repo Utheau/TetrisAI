@@ -81,7 +81,7 @@
 
   // VALUES OF THE GAME
   let score = 0;
-  let speed = 400;
+  let speed = 1;
   let changeSpeed = false;
   let roundState;
   let saveState;
