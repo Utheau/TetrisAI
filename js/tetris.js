@@ -862,21 +862,21 @@
     infoHeader.html('<h4>Key Commands</h4>');
     let bodyInfo = $('<div>').addClass('bodyInfo');
     bodyInfo.html("<ul>\
+                        <li id='li7'>Load a full evolved Generation [CTRL]</li>\
+                        <br />\
                         <li id='li1'>Activate / Deactivate AI [X]</li>\
                         <br />\
                         <li id='li2'>Move Shape [Left & Right\
-                        &nbsp;&nbsp;Arrow Keys]\
+                        Arrow Keys]\
                         <br /><br />\
                         <li id='li3'>Move Down Shape [Down \
-                          &nbsp;&nbsp;Arrow]</li>\
+                          Arrow]</li>\
                         <br />\
                         <li id='li4'>Rotate Shape [Up Arrow]</li>\
                         <br />\
                         <li id='li5'>Speed Up [B]</li>\
                         <br />\
                         <li id='li6'>Slow Down [N]</li>\
-                        <br />\
-                        <li id='li7'>Load a full evolve Generation [CTRL]</li>\
                         <br />\
                         <li id='li8'>Save Current State [A]</li>\
                         <br />\
