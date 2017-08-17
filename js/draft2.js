@@ -1,5 +1,5 @@
   //define the playable board
-  let grid = [
+  var grid = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -23,7 +23,7 @@
   ];
 
   // shapes of the blocks
-  const shapes = {
+  var shapes = {
     I: [
       [0, 0, 0, 0],
       [1, 1, 1, 1],
@@ -69,56 +69,56 @@
   };
 
   // colors of the blocks
-  const colors = ["cyan", "royalblue", "magenta", "chocolate", "forestgreen", "khaki", "crimson"];
+  var colors = ["cyan", "royalblue", "magenta", "chocolate", "forestgreen", "khaki", "crimson"];
   // random method to choose the shapes of the blocks
-  let rndSeed = 1;
+  var rndSeed = 1;
 
   // SHAPES BLOCKS
   // shapes and coordinates parameter of current block that we can update
-  let actualShape = {
+  var actualShape = {
     x: 0,
     y: 0,
     shape: undefined
   };
   // store upcoming shape
-  let followingShape;
+  var followingShape;
   // array to store shapes
-  let bag = [];
+  var bag = [];
   // index for the shapes in the bag
-  let bagIndex = 0;
+  var bagIndex = 0;
 
   // VALUES OF THE GAME
-  let score = 0;
-  let speed = 400;
-  let changeSpeed = false;
+  var score = 0;
+  var speed = 400;
+  var changeSpeed = false;
   // store current game state
-  let roundState;
+  var roundState;
   // storing the current state so that it can be loaded later
-  let saveState;
+  var saveState;
   // list of Speeds available for the game
-  let gameSpeeds = [600, 400, 200, 100, 50, 5, 1, 0];
-  let indexGameSpeed = 1;
+  var gameSpeeds = [600, 400, 200, 100, 50, 5, 1, 0];
+  var indexGameSpeed = 1;
   // turn our AI on or off (so that a player could get in control and play)
-  let ai = true;
-  let draw = true;
-  let takenMoves = 0;
+  var ai = true;
+  var draw = true;
+  var takenMoves = 0;
   // max moves in a generation
-  let moveLimit = 500;
+  var moveLimit = 500;
   // 7 moves in the algorithm
-  let moveAlgorithm = {};
+  var moveAlgorithm = {};
   // push to the highest move selection
-  let inspectMoveSelection = false;
+  var inspectMoveSelection = false;
 
   // ALGORITHM VALUES
   // stores the number of genomes
-  let populationSize = 60;
+  var populationSize = 60;
   // current number of a generation
-  let generation = 0;
+  var generation = 0;
   // stores for genomes
-  let genomes = [];
-  let currentGenome = -1;
+  var genomes = [];
+  var currentGenome = -1;
   // stores info of a generation
-  let archive = {
+  var archive = {
     populationSize: 0,
     currentGeneration: 0,
     genomes: [],
@@ -126,8 +126,8 @@
   };
 
   // indicators of a mutation speed
-  let mutationRate = 0.25;
-  let mutationStep = 0.4;
+  var mutationRate = 0.25;
+  var mutationStep = 0.4;
 
   // calling the main function on load
   function starter() {
@@ -140,7 +140,7 @@
     roundState = getState();
     createInitialPopulation();
     // inside the game loop 
-    let loop = function () {
+    var loop = function () {
       if (changeSpeed) {
         clearInterval(interval);
         interval = setInterval(loop, speed);
@@ -163,13 +163,13 @@
         updateScore();
       }
     };
-    let interval = setInterval(loop, speed);
+    var interval = setInterval(loop, speed);
   }
   document.onLoad = starter();
 
   // key listeners 
   window.onkeydown = function (event) {
-    let characterPressed = String.fromCharCode(event.keyCode);
+    var characterPressed = String.fromCharCode(event.keyCode);
     if (event.keyCode == 38) {
       shapeRotation();
     } else if (event.keyCode == 40) {
@@ -225,9 +225,9 @@
     genomes = [];
     // for each population randomize the 7 initial values making a genome
     // each value will be updated through the evolution
-    for (let i = 0; i < populationSize; i++) {
+    for (var i = 0; i < populationSize; i++) {
       // 7 key values of a population
-      let genome = {
+      var genome = {
 
         id: Math.random(),
         // weigth of the row, the more rows are cleared the bigger will be the weight's value
@@ -272,15 +272,15 @@
     genomes.sort(function (a, b) {
       return b.fitness - a.fitness;
     });
-    // let's add the best fit genome to the elites array
+    // var's add the best fit genome to the elites array
     archive.elites.push(clone(genomes[0]));
-    // show the result of the selection and delete the non fit genomes
+    // show the result of the selection and devare the non fit genomes
     console.log("The elite fitness is: " + genomes[0].fitness);
     while (genomes.length > populationSize / 2) {
       genomes.pop();
     }
-    let totFitness = 0;
-    for (let i = 0; i < genomes.length; i++) {
+    var totFitness = 0;
+    for (var i = 0; i < genomes.length; i++) {
       totFitness += genomes[i].fitness;
     }
 
@@ -289,7 +289,7 @@
 
       return genomes[randomWeightedNumBetween(0, genomes.length - 1)];
     }
-    let children = [];
+    var children = [];
     // adding the fit genomes 
     children.push(clone(genomes[0]));
     while (children.length < populationSize) {
@@ -317,7 +317,7 @@
 
   function createChild(mother, father) {
     // creation of the child with random values from mother and father genomes
-    let child = {
+    var child = {
       id: Math.random(),
       clearedRows: randomChoice(mother.clearedRows, father.clearedRows),
       heightWeighted: randomChoice(mother.heightWeighted, father.heightWeighted),
@@ -351,37 +351,37 @@
 
   // array of all the possible moves can happen in the current state
   function everyPossibleMove() {
-    let lastState = getState();
-    let possibleMoves = [];
-    let movesRating = [];
-    let iterations = 0;
-    for (let rots = 0; rots < 4; rots++) {
-      let previousX = [];
-      for (let t = -5; t <= 5; t++) {
+    var lastState = getState();
+    var possibleMoves = [];
+    var movesRating = [];
+    var iterations = 0;
+    for (var rots = 0; rots < 4; rots++) {
+      var previousX = [];
+      for (var t = -5; t <= 5; t++) {
         iterations++;
         loadState(lastState);
-        for (let j = 0; j < rots; j++) {
+        for (var j = 0; j < rots; j++) {
           shapeRotation();
         }
         // if the iteration is less than 0 than we move the shape to the left
         // otherwise we move it to the right 
         if (t < 0) {
-          for (let l = 0; l < Math.abs(t); l++) {
+          for (var l = 0; l < Math.abs(t); l++) {
             moveLeft();
           }
         } else if (t > 0) {
-          for (let r = 0; r < t; r++) {
+          for (var r = 0; r < t; r++) {
             moveRight();
           }
         }
-        // if it does not move nor to the left/right/rotate than let it go down
+        // if it does not move nor to the left/right/rotate than var it go down
 
         if (!contains(previousX, actualShape.x)) {
-          let moveDownOutcome = moveDown();
+          var moveDownOutcome = moveDown();
           while (moveDownOutcome.moved) {
             moveDownOutcome = moveDown();
           }
-          let algorithm = {
+          var algorithm = {
             clearedRows: moveDownOutcome.clearedRows,
             heightWeighted: Math.pow(getHeight(), 1.5),
             sumHeight: getSumHeight(),
@@ -391,7 +391,7 @@
           };
           // rate each move with the result obtained from the algorithm (of course starting from 0)
           // if lose the game with the new move, than lower its rating
-          let rating = 0;
+          var rating = 0;
           rating += algorithm.clearedRows * genomes[currentGenome].clearedRows;
           rating += algorithm.heightWeighted * genomes[currentGenome].heightWeighted;
           rating += algorithm.sumHeight * genomes[currentGenome].sumHeight;
@@ -424,11 +424,11 @@
     // iterating through the list of moves we check if there is one (Move)
     // greater than our maximum rating, if so than we will add it to our moves values, and store its index 
     // if it's the same we'll add to the ties array
-    let maximumRating = -100000000000000;
-    let maximumMove = -1;
-    let ties = [];
+    var maximumRating = -100000000000000;
+    var maximumMove = -1;
+    var ties = [];
 
-    for (let index = 0; index < moves.length; index++) {
+    for (var index = 0; index < moves.length; index++) {
       if (moves[index].rating > maximumRating) {
         maximumRating = moves[index].rating;
         maximumMove = index;
@@ -437,7 +437,7 @@
         ties.push(index);
       }
     }
-    let move = moves[ties[0]];
+    var move = moves[ties[0]];
     move.algorithm.ties = ties.length;
     return move;
   }
@@ -456,28 +456,28 @@
       // add the rating of the selected move in the ratings array, load the state and get the highest rated move (in the array)
       // rotate and move left or right in order to find the optimal fit
       // update the move algorithm, replace the old drawing with the current one, output the state and update the score
-      let oldDraw = clone(draw);
+      var oldDraw = clone(draw);
       draw = false;
-      let possibleMoves = everyPossibleMove();
-      let previousState = getState();
+      var possibleMoves = everyPossibleMove();
+      var previousState = getState();
       nextShape();
       // check all the moves and choose the best one
-      for (let i = 0; i < possibleMoves.length; i++) {
-        let nextMove = highestRatedMove(everyPossibleMove());
+      for (var i = 0; i < possibleMoves.length; i++) {
+        var nextMove = highestRatedMove(everyPossibleMove());
         possibleMoves[i].rating += nextMove.rating;
       }
       loadState(previousState);
-      let move = highestRatedMove(possibleMoves);
+      var move = highestRatedMove(possibleMoves);
       // rotation
-      for (let rotations = 0; rotations < move.rotations; rotations++) {
+      for (var rotations = 0; rotations < move.rotations; rotations++) {
         shapeRotation();
       }
       if (move.translation < 0) {
-        for (let lefts = 0; lefts < Math.abs(move.translation); lefts++) {
+        for (var lefts = 0; lefts < Math.abs(move.translation); lefts++) {
           moveLeft();
         }
       } else if (move.translation > 0) {
-        for (let rights = 0; rights < move.translation; rights++) {
+        for (var rights = 0; rights < move.translation; rights++) {
           moveRight();
         }
       }
@@ -493,16 +493,16 @@
   // returns the sum height of all columns
   function getSumHeight() {
     removeShape();
-    let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
-    for (let row = 0; row < grid.length; row++) {
-      for (let col = 0; col < grid[row].length; col++) {
+    var tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+    for (var row = 0; row < grid.length; row++) {
+      for (var col = 0; col < grid[row].length; col++) {
         if (grid[row][col] !== 0 && tops[col] === 20) {
           tops[col] = row;
         }
       }
     }
-    let sumHeight = 0;
-    for (let i = 0; i < tops.length; i++) {
+    var sumHeight = 0;
+    for (var i = 0; i < tops.length; i++) {
       sumHeight += 20 - tops[i];
     }
     applyShape();
@@ -514,17 +514,17 @@
   function getHoles() {
     removeShape();
 
-    let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
-    for (let row = 0; row < grid.length; row++) {
-      for (let col = 0; col < grid[row].length; col++) {
+    var tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+    for (var row = 0; row < grid.length; row++) {
+      for (var col = 0; col < grid[row].length; col++) {
         if (grid[row][col] !== 0 && tops[col] === 20) {
           tops[col] = row;
         }
       }
     }
-    let holes = 0;
-    for (let x = 0; x < tops.length; x++) {
-      for (let y = tops[x]; y < grid.length; y++) {
+    var holes = 0;
+    for (var x = 0; x < tops.length; x++) {
+      for (var y = tops[x]; y < grid.length; y++) {
         if (grid[y][x] === 0) {
           holes++;
         }
@@ -536,18 +536,18 @@
 
   // returns the changed holes in the grid with the value of -1
   function getArrayHoles() {
-    let array = clone(grid);
+    var array = clone(grid);
     removeShape();
-    let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
-    for (let row = 0; row < grid.length; row++) {
-      for (let col = 0; col < grid[row].length; col++) {
+    var tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+    for (var row = 0; row < grid.length; row++) {
+      for (var col = 0; col < grid[row].length; col++) {
         if (grid[row][col] !== 0 && tops[col] === 20) {
           tops[col] = row
         }
       }
     }
-    for (let x = 0; x < tops.length; x++) {
-      for (let y = tops[x]; y < grid.length; y++) {
+    for (var x = 0; x < tops.length; x++) {
+      for (var y = tops[x]; y < grid.length; y++) {
         if (grid[y][x] === 0) {
           array[y][x] = -1;
         }
@@ -560,17 +560,17 @@
   // returns the roughness of the grid
   function getRoughness() {
     removeShape();
-    let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
-    for (let row = 0; row < grid.length; row++) {
-      for (let col = 0; col < grid[row].length; col++) {
+    var tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+    for (var row = 0; row < grid.length; row++) {
+      for (var col = 0; col < grid[row].length; col++) {
         if (grid[row][col] !== 0 && tops[col] === 20) {
           tops[col] = row;
         }
       }
     }
-    let roughness = 0;
-    let diff = [];
-    for (let i = 0; i < tops.length - 1; i++) {
+    var roughness = 0;
+    var diff = [];
+    for (var i = 0; i < tops.length - 1; i++) {
       roughness += Math.abs(tops[i] - tops[i + 1]);
       diff[i] = Math.abs(tops[i] - tops[i + 1]);
     }
@@ -581,9 +581,9 @@
   // returns the different heights ranges of the columns 
   function getAverageHeight() {
     removeShape();
-    let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
-    for (let row = 0; row < grid.length; row++) {
-      for (let col = 0; col < grid[row].length; col++) {
+    var tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+    for (var row = 0; row < grid.length; row++) {
+      for (var col = 0; col < grid[row].length; col++) {
         if (grid[row][col] !== 0 && tops[col] === 20) {
           tops[col] = row;
         }
@@ -598,9 +598,9 @@
   // returns the absolute height (biggest column)
   function getHeight() {
     removeShape();
-    let tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
-    for (let row = 0; row < grid.length; row++) {
-      for (let col = 0; col < grid[row].length; col++) {
+    var tops = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+    for (var row = 0; row < grid.length; row++) {
+      for (var col = 0; col < grid[row].length; col++) {
         if (grid[row][col] !== 0 && tops[col] === 20) {
           tops[col] = row;
         }
@@ -612,7 +612,7 @@
 
   // if possible moves the shape down
   function moveDown() {
-    let result = {
+    var result = {
       moved: true,
       lose: false,
       clearedRows: 0
@@ -673,12 +673,12 @@
     applyShape();
   }
 
-  // clears completed rows iterating through rows and columns to check whether any 0 is present 
+  // clears compvared rows iterating through rows and columns to check whether any 0 is present 
   function clearRows() {
-    let toBeCleared = [];
-    for (let row = 0; row < grid.length; row++) {
-      let withEmptySpace = false;
-      for (let col = 0; col < grid[row].length; col++) {
+    var toBeCleared = [];
+    for (var row = 0; row < grid.length; row++) {
+      var withEmptySpace = false;
+      for (var col = 0; col < grid[row].length; col++) {
         if (grid[row][col] === 0) {
           withEmptySpace = true;
         }
@@ -698,8 +698,8 @@
       score += 12000;
     }
     // create new arr for cleared rows and removed them from the grid
-    let clearedRows = clone(toBeCleared.length);
-    for (let toBe = toBeCleared.length - 1; toBe >= 0; toBe--) {
+    var clearedRows = clone(toBeCleared.length);
+    for (var toBe = toBeCleared.length - 1; toBe >= 0; toBe--) {
       grid.splice(toBeCleared[toBe], 1);
     }
     while (grid.length < 20) {
@@ -711,8 +711,8 @@
   // applies the current shape to the grid checking whether the value on the grid is not 0
   // if the condition applies than the value of the shape will be attached to the grid
   function applyShape() {
-    for (let row = 0; row < actualShape.shape.length; row++) {
-      for (let col = 0; col < actualShape.shape[row].length; col++) {
+    for (var row = 0; row < actualShape.shape.length; row++) {
+      for (var col = 0; col < actualShape.shape[row].length; col++) {
         if (actualShape.shape[row][col] !== 0) {
           grid[actualShape.y + row][actualShape.x + col] = actualShape.shape[row][col];
         }
@@ -723,8 +723,8 @@
   // removes the shape from the grid 
   // we check whether the position of the shape is present in row and col and if it is we replace it with our 0 (canvas value)
   function removeShape() {
-    for (let row = 0; row < actualShape.shape.length; row++) {
-      for (let col = 0; col < actualShape.shape[row].length; col++) {
+    for (var row = 0; row < actualShape.shape.length; row++) {
+      for (var col = 0; col < actualShape.shape[row].length; col++) {
         if (actualShape.shape[row][col] !== 0) {
           grid[actualShape.y + row][actualShape.x + col] = 0;
         }
@@ -744,7 +744,7 @@
     }
     // almost end of bag
     if (bagIndex == bag.length - 1) {
-      let previousSeed = rndSeed;
+      var previousSeed = rndSeed;
 
       followingShape = randomProperty(shapes);
       rndSeed = previousSeed;
@@ -760,9 +760,9 @@
   // generate a new bag of shapes 
   function generateNewBag() {
     bag = [];
-    let insideBag = "";
-    for (let i = 0; i < 7; i++) {
-      let shape = randomKey(shapes);
+    var insideBag = "";
+    for (var i = 0; i < 7; i++) {
+      var shape = randomKey(shapes);
       while (insideBag.indexOf(shape) != -1) {
         shape = randomKey(shapes);
       }
@@ -774,8 +774,8 @@
 
   // check if the shape and the grid collide, iterating trough the shapes size we check if is solid and if collides with the grid
   function collides(canvas, obj) {
-    for (let row = 0; row < obj.shape.length; row++) {
-      for (let col = 0; col < obj.shape[row].length; col++) {
+    for (var row = 0; row < obj.shape.length; row++) {
+      for (var col = 0; col < obj.shape[row].length; col++) {
         if (obj.shape[row][col] !== 0) {
           if (canvas[obj.y + row] === undefined || canvas[obj.y + row][obj.x + col] === undefined || canvas[obj.y + row][obj.x + col] !== 0) {
             return true;
@@ -789,9 +789,9 @@
   // to understand how many times we should rotate the shape
   // and each time flipping the shape of the matrix and reversing each column for the length of it (matrix)
   function rotate(matrix, times) {
-    for (let t = 0; t < times; t++) {
+    for (var t = 0; t < times; t++) {
       matrix = revert(matrix);
-      for (let i = 0; i < matrix.length; i++) {
+      for (var i = 0; i < matrix.length; i++) {
         matrix[i].reverse();
       }
     }
@@ -811,7 +811,7 @@
   function update() {
     // if ai is on & genome is nonzero
     if (ai && currentGenome != -1) {
-      let outcome = moveDown();
+      var outcome = moveDown();
       // if nothing happend -> if we lost (update the fitness and move to the next gen)
       // if are we still alive make next move otherwise move down 
       // output & updateScore
@@ -863,19 +863,19 @@
   // output the state into the screen
   function output() {
     if (draw) {
-      let output = $('#output');
+      var output = $('#output');
       output.empty();
-      let title = $('<div>').addClass('title');
+      var title = $('<div>').addClass('title');
       title.html('<p>TetrisAI</p>');
-      let subtitle = $('<div>').addClass('subtitle');
+      var subtitle = $('<div>').addClass('subtitle');
       subtitle.append('<p>The evolution of Tetris</p>');
       output.append(title);
       output.append(subtitle);
-      let playground = $('<div>').addClass('play');
-      for (let i = 0; i < grid.length; i++) {
-        let cellsRow = $('<div>').addClass('row');
-        for (let j = 0; j < grid[i].length; j++) {
-          let cell = $('<div>').addClass('cell');
+      var playground = $('<div>').addClass('play');
+      for (var i = 0; i < grid.length; i++) {
+        var cellsRow = $('<div>').addClass('row');
+        for (var j = 0; j < grid[i].length; j++) {
+          var cell = $('<div>').addClass('cell');
           if (grid[i][j] !== 0) {
             cell.css('background-color', colors[parseInt(grid[i][j]) - 1]);
           }
@@ -890,34 +890,34 @@
   // update & render the score 
   function updateScore() {
     if (draw) {
-      let info = $('#score');
+      var info = $('#score');
       info.empty();
-      let scorestyle = $('<div>').addClass('scorestyle');
+      var scorestyle = $('<div>').addClass('scorestyle');
       scorestyle.append('<br /><h2>&nbsp;Score: ' + score + '</h2>');
-      let shapesty = $('<div>').addClass('shapesty');
+      var shapesty = $('<div>').addClass('shapesty');
       shapesty.html('++Next Shape++');
-      const block = $('<div>').addClass('block');
-      for (let i = 0; i < followingShape.length; i++) {
+      var block = $('<div>').addClass('block');
+      for (var i = 0; i < followingShape.length; i++) {
         $('<div>').addClass('row');
-        let blockRow = $('<div>').addClass('row');
-        for (let j = 0; j < followingShape[i].length; j++) {
-          let cell = $('<div>').addClass('cell');
+        var blockRow = $('<div>').addClass('row');
+        for (var j = 0; j < followingShape[i].length; j++) {
+          var cell = $('<div>').addClass('cell');
           if (followingShape[i][j] !== 0)
             cell.css('background-color', colors[parseInt(followingShape[i][j]) - 1]);
           blockRow.append(cell);
         }
         block.append(blockRow);
       }
-      let speedScore = $('<div>').addClass('speedScore');
+      var speedScore = $('<div>').addClass('speedScore');
       speedScore.html('<br />Speed: ' + speed);
-      let movesScore = $('<div>').addClass('movesScore');
+      var movesScore = $('<div>').addClass('movesScore');
       if (ai) {
         movesScore.html('Moves: ' + takenMoves + '/' + moveLimit + '<br />\
                       Generation: ' + generation + '<br />\
                       Genome: ' + (currentGenome + 1) + '/' + populationSize + '<br />\
                       <div class= "genome">' + JSON.stringify(genomes[currentGenome], null, '  ') + '</div>');
       }
-      let moveSelScore = $('<div>').addClass('moveSelScore');
+      var moveSelScore = $('<div>').addClass('moveSelScore');
       if (inspectMoveSelection) {
         moveSelScore.html('<pre>' + JSON.stringify(moveAlgorithm, null, 2) + '</pre>');
       }
@@ -932,11 +932,11 @@
 
   // render the instuctions on the screen
   function instructions() {
-    let instruction = $('#instructions');
+    var instruction = $('#instructions');
     instruction.empty();
-    let infoHeader = $('<div>').addClass('infoHeader');
+    var infoHeader = $('<div>').addClass('infoHeader');
     infoHeader.html('<h4>Key Commands</h4>');
-    let bodyInfo = $('<div>').addClass('bodyInfo');
+    var bodyInfo = $('<div>').addClass('bodyInfo');
     bodyInfo.html("<ul>\
                         <li id='li1'>Activate / Deactivate AI [X]</li>\
                         <br />\
@@ -967,7 +967,7 @@
 
   // function that defines the current state of the game
   function getState() {
-    let state = {
+    var state = {
       grid: clone(grid),
       actualShape: clone(actualShape),
       followingShape: clone(followingShape),
@@ -1014,8 +1014,8 @@
   }
 
   function randomKey(obj) {
-    let keys = Object.keys(obj);
-    let x = seededRandom(0, keys.length);
+    var keys = Object.keys(obj);
+    var x = seededRandom(0, keys.length);
     return keys[x];
   }
 
@@ -1029,7 +1029,7 @@
     min = min || 0;
 
     rndSeed = (rndSeed * 9301 + 49297) % 233280;
-    let random = rndSeed / 233280;
+    var random = rndSeed / 233280;
 
     return Math.floor(min + random * (max - min));
   }
@@ -1051,7 +1051,7 @@
   }
 
   function contains(z, obj) {
-    let y = z.length;
+    var y = z.length;
     while (y--) {
       if (z[y] === obj) {
         return true;
