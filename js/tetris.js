@@ -864,8 +864,8 @@
     bodyInfo.html("<ul>\
                         <li id='li7'>Load a full evolved Generation [CTRL]</li>\
                         <br />\
-                        <li id='li1'>Activate / Deactivate AI [X]</li>\
-                        <br />\
+                        \
+                        \
                         <li id='li2'>Move Shape [Left & Right\
                         Arrow Keys]\
                         <br /><br />\
@@ -888,7 +888,8 @@
     instruction.append(infoHeader);
     instruction.append(bodyInfo);
   }
-
+// <li id='li1'>Activate / Deactivate AI [X]</li>
+// <br />
 
   function getState() {
     var state = {
