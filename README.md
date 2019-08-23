@@ -5,8 +5,7 @@
 ![tetris8](https://user-images.githubusercontent.com/25878975/28926785-21aee25a-7869-11e7-9985-3b24ee5a8ba5.gif)
 
                This is a screenshot of the TetrisAI in action at Generation 13
-To see the demo live and play with it [go here](https://rawgit.com/Utheau/TetrisAI/master/index.html
-) and more important to see a fully evolved generation, and compare the difference between generation 0 and generation 13, **press the CTRL key!**
+To see the demo live and play with it [go here](https://utheau.github.io/TetrisAI/) and more important to see a fully evolved generation, and compare the difference between generation 0 and generation 13, **press the CTRL key!**
                
 ## What is TetrisAI
 
